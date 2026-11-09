@@ -38,6 +38,9 @@ window.TT_CONFIG = {
     if (!window.supabase || !C.SUPABASE_URL || C.SUPABASE_URL.includes("YOUR-PROJECT")) return null;
     const sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
     window.__sb = sb;
+    // Count this visit (skipped for Dominique in the database)
+    try { let vid = localStorage.getItem("tt_vid"); if (!vid) { vid = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()); localStorage.setItem("tt_vid", vid); }
+      setTimeout(() => { sb.rpc("log_visit", { vid }).then(() => {}, () => {}); }, 1500); } catch (_) {}
     const { data } = await sb.auth.getSession();
     let session = data.session;
     // Came from the invite link: get them in with no email step
@@ -1011,6 +1014,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
 input[type=password]{width:100%;font:inherit;min-height:48px;color:var(--ink);border-radius:0;background:transparent;border:0;border-bottom:1px solid var(--line);padding:12px 0;font-weight:300;outline-offset:2px}
 .ao-pay{margin:-2px 0 6px 44px;display:inline-flex;width:auto}
 .ao-paid{margin:-2px 0 6px 44px;color:var(--mint-ink)}
+.visit-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}.visit-grid b{display:block;font-family:var(--display);font-weight:400;font-size:30px;line-height:1.1}.visit-grid small{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 /* iPhones zoom in on inputs under 16px and stay zoomed */
 input,select,textarea{font-size:16px!important}
 </style>
@@ -1425,6 +1429,11 @@ input,select,textarea{font-size:16px!important}
           <li>Leave email receipts on. If someone disputes a charge, upload their Record PDF from the guest list below, plus the Stripe receipt, as your evidence.</li>
         </ul></details>
       </form>
+      <div class="card list" id="visits-card">
+        <span class="label">Site visits</span>
+        <div class="visit-grid" id="visit-grid"><div><b>–</b><small>people</small></div><div><b>–</b><small>this week</small></div><div><b>–</b><small>today</small></div><div><b>–</b><small>total visits</small></div></div>
+        <p class="note" id="visit-note">Your own visits aren't counted. A visit is one person opening the site, counted at most once an hour.</p>
+      </div>
       <div class="card list" id="invite-card">
         <span class="label">Guest list access</span>
         <p class="note">Friends join with your invite link below, no emails needed. You can also add someone by email here.</p>
@@ -1819,7 +1828,11 @@ input,select,textarea{font-size:16px!important}
     set("You're all set","See you in Grace Bay","Check the plan anytime","Plan","#plan"); }
 
   // Host
-  function renderHost(){ $("#host-link").hidden=!isOwner; if(!isOwner) return;
+  let visitsAt=0;
+  async function loadVisits(){ if(!isOwner||Date.now()-visitsAt<60000) return; visitsAt=Date.now(); const sb=window.__sb; if(!sb) return;
+    try{ const { data }=await sb.rpc("visit_stats"); if(!data) return; const g=$("#visit-grid").querySelectorAll("b"); [data.people,data.week,data.today,data.visits].forEach((n,i)=>g[i].textContent=n??0);
+      if(data.last) $("#visit-note").textContent="Last visit "+fmtFull(data.last)+". Your own visits aren't counted. A visit is one person opening the site, counted at most once an hour."; }catch(_){} }
+  function renderHost(){ $("#host-link").hidden=!isOwner; if(!isOwner) return; loadVisits();
     if(config?.stripeUrl&&document.activeElement!==$("#stripe")) $("#stripe").value=config.stripeUrl;
     const AO=config?.addons||{}; ["jetcars"].forEach(k=>{ const a=AO[k]||{}; if(a.price&&document.activeElement!==$("#ao-"+k+"-price")) $("#ao-"+k+"-price").value=a.price; if(a.link&&document.activeElement!==$("#ao-"+k+"-link")) $("#ao-"+k+"-link").value=a.link; });
     const PL=config?.payLinks||{}; [["pl-dep","dep"],["pl-p12","p12"],["pl-p3","p3"],["pl-final","final"]].forEach(([fid,k])=>{ if(PL[k]&&document.activeElement!==$("#"+fid)) $("#"+fid).value=PL[k]; });
