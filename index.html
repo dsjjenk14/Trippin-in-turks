@@ -862,6 +862,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
 .player.spotify iframe{display:block;border:0;border-radius:12px}
 .anthem-embed{display:grid;gap:10px;justify-items:center}
 .anthem-embed iframe{border:0;border-radius:12px;display:block;max-width:100%}
+.sel{width:100%;font:inherit;min-height:48px;padding:10px 0;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--ink);border-radius:0}
 </style>
 
 </head>
@@ -1060,9 +1061,11 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
         <div id="stamp-slot"></div>
         <div class="field"><label class="fl" for="nick">Your name</label><input type="text" id="nick" maxlength="40" placeholder="What should we call you?" autocomplete="nickname"></div>
         <div class="field"><label class="fl" for="email">Email for payment reminders</label><input type="email" id="email" maxlength="120" placeholder="you@email.com" autocomplete="email" inputmode="email"><p class="note">Dominique's reminders for your deposit and monthly payments go here.</p></div>
+        <div class="field"><label class="fl" for="tshirt">T-shirt size</label><select id="tshirt" class="sel"><option value="">Choose a size</option><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>2XL</option><option>3XL</option></select><p class="note">For the Trippin in Turks shirts. Unisex sizing.</p></div>
         <label class="toggle" for="plus"><input type="checkbox" id="plus"><span>I'm bringing a plus one</span></label>
         <div id="plus-fields" class="field" hidden>
           <input type="text" id="plus-name" maxlength="40" placeholder="Their name" aria-label="Plus one's name">
+          <label class="fl" for="plus-tshirt">Plus one's T-shirt size</label><select id="plus-tshirt" class="sel"><option value="">Choose a size</option><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>2XL</option><option>3XL</option></select>
           <p class="note">Check this to pay for both of you, and your deposit and payments double. Or skip it and have your plus one RSVP and pay on their own from the same link. Dominique will confirm space.</p>
           <label class="toggle" for="plus-agree"><input type="checkbox" id="plus-agree"><span>My plus one has read and agrees to the terms, waiver and damage policy, and is 21 or older.</span></label>
           <div class="sig-row"><label class="fl" for="sigpad2">Plus one's signature</label><button type="button" class="link-btn" id="sig2-clear">Clear</button></div>
@@ -1252,6 +1255,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
         <span class="label">Guest list · tap a payment to confirm it</span>
         <p class="note" style="margin:4px 0 8px">Dep is the deposit. A red ! means it's past the 7 days.</p>
         <p class="note" id="opt-counts" style="margin:0 0 8px"></p>
+        <p class="note" id="tshirt-counts" style="margin:0 0 8px"></p>
         <div class="tbl-wrap"><table><thead><tr><th>Friend</th><th>RSVP</th><th>Vote</th><th>Payments</th><th>Optional</th><th>Record · notes</th></tr></thead><tbody id="roster"><tr><td colspan="6">No RSVPs yet.</td></tr></tbody></table></div>
       </div>
     </section>
@@ -1456,7 +1460,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
   $("#plus").addEventListener("change",()=>{ if($("#plus").checked) pad2.refresh(); });
 
   // RSVP
-  ["nick","email","notes","plus-name"].forEach(id=>$("#"+id).addEventListener("input",()=>{formDirty=true;}));
+  ["nick","email","notes","plus-name","tshirt","plus-tshirt"].forEach(id=>$("#"+id).addEventListener("input",()=>{formDirty=true;}));
   $("#plus").addEventListener("change",()=>{ $("#plus-fields").hidden=!$("#plus").checked; formDirty=true; });
   let myProfileName="";
   const mrzClean=t=>String(t||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase().replace(/[^A-Z ]/g," ").trim().replace(/\s+/g,"<");
@@ -1480,7 +1484,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
     if(g?.status==="in") slot.append(el("span",{class:"stamp",text:"✓ YOU'RE IN"+(g.plusOne?" +1":"")}));
     else if(g?.status==="out") slot.append(el("span",{class:"stamp out",text:"CAN'T MAKE IT"}));
     updateBook(false);
-    if(formDirty||!g) return; $("#agree").checked=!!g.termsAcceptedAt; if(g.signature){ $("#sig-note").textContent="Signed. Tap Clear to redo it."; requestAnimationFrame(sigSetup); } $("#nick").value=g.nickname||""; $("#email").value=g.email||""; updateBook(false); $("#notes").value=g.notes||""; $("#plus").checked=!!g.plusOne; $("#plus-name").value=g.plusOne?.name||""; $("#plus-fields").hidden=!g.plusOne; $("#plus-agree").checked=!!g.plusOne?.termsAcceptedAt; if(g.plusOne?.signature){ $("#sig2-note").textContent="Signed. Tap Clear to redo it."; pad2.refresh(); } }
+    if(formDirty||!g) return; $("#agree").checked=!!g.termsAcceptedAt; if(g.signature){ $("#sig-note").textContent="Signed. Tap Clear to redo it."; requestAnimationFrame(sigSetup); } $("#nick").value=g.nickname||""; $("#email").value=g.email||""; $("#tshirt").value=g.tshirt||""; $("#plus-tshirt").value=g.plusOne?.tshirt||""; updateBook(false); $("#notes").value=g.notes||""; $("#plus").checked=!!g.plusOne; $("#plus-name").value=g.plusOne?.name||""; $("#plus-fields").hidden=!g.plusOne; $("#plus-agree").checked=!!g.plusOne?.termsAcceptedAt; if(g.plusOne?.signature){ $("#sig2-note").textContent="Signed. Tap Clear to redo it."; pad2.refresh(); } }
   function logFor(id,e){ return [...(guests[id]?.log||[]),{t:new Date().toISOString(),e}].slice(-300); }
   function termsText(){ return [...document.querySelectorAll("#terms .refund div, #terms .tl, #terms li")].map(n=>n.textContent.replace(/\s+/g," ").trim()).filter(Boolean).join("\n"); }
   async function saveMine(f){ const ref=db.doc("guests/"+meId); if(guests[meId]) await ref.update(f); else await ref.set(f); }
@@ -1492,14 +1496,16 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
   $("#rsvp-form").addEventListener("submit",async ev=>{ ev.preventDefault(); if(!db||!meId) return flash("rsvp-status","Sign in to RSVP.","err");
     const nick=$("#nick").value.trim(); if(!nick) return flash("rsvp-status","Add your name so we know who you are.","err");
     const email=$("#email").value.trim(); if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return flash("rsvp-status","Add a valid email so you get payment reminders.","err");
-    const plus=$("#plus").checked?{name:$("#plus-name").value.trim()}:null; if(plus&&!plus.name) return flash("rsvp-status","Add your plus one's name, or uncheck the box.","err");
+    const tshirt=$("#tshirt").value; if(!tshirt) return flash("rsvp-status","Pick your T-shirt size.","err");
+    const plus=$("#plus").checked?{name:$("#plus-name").value.trim(),tshirt:$("#plus-tshirt").value}:null; if(plus&&!plus.name) return flash("rsvp-status","Add your plus one's name, or uncheck the box.","err");
+    if(plus&&!plus.tshirt) return flash("rsvp-status","Pick your plus one's T-shirt size.","err");
     const signedBefore=!!guests[meId]?.termsAcceptedAt;
     if(plus){ const prev=guests[meId]?.plusOne; if(!$("#plus-agree").checked) return flash("rsvp-status","Check the box confirming your plus one agrees to the terms.","err");
       if(!pad2.isDirty()&&!prev?.signature) return flash("rsvp-status","Have your plus one sign, or uncheck the box and have them RSVP on their own.","err");
       plus.signature=pad2.isDirty()?pad2.data():prev.signature; plus.termsAcceptedAt=pad2.isDirty()?new Date().toISOString():(prev.termsAcceptedAt||new Date().toISOString()); plus.termsVersion=TERMS_V; }
     if(!$("#agree").checked) return flash("rsvp-status","Check the box to agree to the terms and waiver.","err");
     if(!sigDirty&&!signedBefore) return flash("rsvp-status","Add your signature to finish your RSVP.","err");
-    $("#rsvp-save").disabled=true; const f={nickname:nick,email,status:"in",plusOne:plus,notes:$("#notes").value.trim(),updatedAt:new Date().toISOString()};
+    $("#rsvp-save").disabled=true; const f={nickname:nick,email,tshirt,status:"in",plusOne:plus,notes:$("#notes").value.trim(),updatedAt:new Date().toISOString()};
     if(sigDirty){ f.signature=sigData(); f.termsAcceptedAt=new Date().toISOString(); f.termsVersion=TERMS_V; f.termsSnapshot=termsText(); } else if(!signedBefore){ f.termsAcceptedAt=new Date().toISOString(); f.termsVersion=TERMS_V; f.termsSnapshot=termsText(); }
     const evs=[guests[meId]?.status==="in"?"Updated RSVP":"RSVP'd yes"]; if(f.termsAcceptedAt) evs.push(`checked the agreement box and signed the terms (version ${TERMS_V})`); if(plus?.signature&&(pad2.isDirty()||!guests[meId]?.plusOne?.signature)) evs.push(`plus one ${plus.name} signed the terms`);
     f.log=logFor(meId,evs.join(", "));
@@ -1574,7 +1580,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
       if(config?.deposit?.amount){ const due=depositDue(g),c=!!g.depositConfirmed,p=!!g.depositPaid,late=due&&!p&&!c&&Date.now()>due.getTime();
         cell.append(el("button",{type:"button",class:"mini"+(c?" on":""),style:late?"border-color:var(--err);color:var(--err)":null,text:(c?"✓ ":p?"$ ":late?"! ":"")+"Dep",title:c?"Deposit confirmed":p?"Marked paid":due?(late?"Overdue since ":"Due ")+fmtDate(due):"Not RSVP'd yet",onclick:()=>toggleDeposit(id)})," "); }
       for(let i=0;i<n;i++){ const p=!!(g.paid||[])[i],c=!!(g.confirmed||[])[i]; cell.append(el("button",{type:"button",class:"mini"+(c?" on":""),text:(c?"✓ ":p?"$ ":"")+"#"+(i+1),onclick:()=>toggleConfirm(id,i)})," "); }
-      body.append(el("tr",{},[el("td",{text:nameFor(id)+(g.plusOne&&g.status==="in"?" +1 "+(g.plusOne.name||""):"")}),el("td",{text:({in:"Going",maybe:"Maybe",out:"Can't"}[g.status]||"No answer")+(g.termsAcceptedAt?" · signed":"")+(g.insured?" · insured":"")+(g.plusOne&&g.status==="in"?(g.plusOne.termsAcceptedAt?" · +1 signed":" · +1 not signed"):"")}),el("td",{text:VILLAS.find(v=>v.key===g.vote)?.name||"None"}),cell,el("td",{text:(g.optIns||[]).map(k=>OPTS.find(o=>o.key===k)?.short).filter(Boolean).join(", ")||"None"}),el("td",{},[el("button",{type:"button",class:"mini",text:"Record PDF",onclick:()=>evidencePdf(id)})," ",el("button",{type:"button",class:"mini"+(g.remindersOff?" on":""),text:g.remindersOff?"Reminders off":"Reminders on",title:g.email||"No email yet",onclick:()=>db.doc("guests/"+id).update({remindersOff:!g.remindersOff,log:logFor(id,g.remindersOff?"Dominique turned email reminders back on":"Dominique turned off email reminders")}).catch(e=>flash("stripe-status",friendlyErr(e),"err"))})," ",document.createTextNode(g.notes||"")])])); }); }
+      body.append(el("tr",{},[el("td",{text:nameFor(id)+(g.tshirt?" ("+g.tshirt+")":"")+(g.plusOne&&g.status==="in"?" +1 "+(g.plusOne.name||"")+(g.plusOne.tshirt?" ("+g.plusOne.tshirt+")":""):"")}),el("td",{text:({in:"Going",maybe:"Maybe",out:"Can't"}[g.status]||"No answer")+(g.termsAcceptedAt?" · signed":"")+(g.insured?" · insured":"")+(g.plusOne&&g.status==="in"?(g.plusOne.termsAcceptedAt?" · +1 signed":" · +1 not signed"):"")}),el("td",{text:VILLAS.find(v=>v.key===g.vote)?.name||"None"}),cell,el("td",{text:(g.optIns||[]).map(k=>OPTS.find(o=>o.key===k)?.short).filter(Boolean).join(", ")||"None"}),el("td",{},[el("button",{type:"button",class:"mini",text:"Record PDF",onclick:()=>evidencePdf(id)})," ",el("button",{type:"button",class:"mini"+(g.remindersOff?" on":""),text:g.remindersOff?"Reminders off":"Reminders on",title:g.email||"No email yet",onclick:()=>db.doc("guests/"+id).update({remindersOff:!g.remindersOff,log:logFor(id,g.remindersOff?"Dominique turned email reminders back on":"Dominique turned off email reminders")}).catch(e=>flash("stripe-status",friendlyErr(e),"err"))})," ",document.createTextNode(g.notes||"")])])); }); }
   async function toggleConfirm(id,i){ const n=config?.installments?.length||4, c=Array.isArray(guests[id].confirmed)?guests[id].confirmed.slice():[]; while(c.length<n) c.push(false); c[i]=!c[i];
     try{ await db.doc("guests/"+id).update({confirmed:c,log:logFor(id,(c[i]?"Dominique confirmed payment ":"Dominique unconfirmed payment ")+(i+1)+" received")}); }catch(e){ flash("stripe-status",friendlyErr(e),"err"); } }
   async function toggleDeposit(id){ try{ await db.doc("guests/"+id).update({depositConfirmed:!guests[id].depositConfirmed,log:logFor(id,!guests[id].depositConfirmed?"Dominique confirmed deposit received":"Dominique unconfirmed deposit")}); }catch(e){ flash("stripe-status",friendlyErr(e),"err"); } }
@@ -1595,6 +1601,8 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
     OPTS.forEach(o=>{ const id="opt-"+o.key; const cb=el("input",{type:"checkbox",id}); cb.checked=mine.includes(o.key); cb.disabled=!can; cb.addEventListener("change",()=>toggleOpt(o.key,cb.checked));
       box.append(el("label",{class:"toggle",for:id},[cb,el("span",{class:"opt-txt"},[el("b",{text:o.title}),el("small",{text:o.sub})])])); });
     if(!can) $("#opt-status").textContent="Sign in to choose your add-ons.";
+    const sz={}; Object.values(guests).filter(g=>g.status==="in").forEach(g=>{ if(g.tshirt) sz[g.tshirt]=(sz[g.tshirt]||0)+1; if(g.plusOne?.tshirt) sz[g.plusOne.tshirt]=(sz[g.plusOne.tshirt]||0)+1; });
+    const tc=$("#tshirt-counts"); if(tc) tc.textContent="T-shirts: "+(["XS","S","M","L","XL","2XL","3XL"].filter(k=>sz[k]).map(k=>k+" "+sz[k]).join(" · ")||"no sizes yet");
     const oc=$("#opt-counts"); if(oc){ oc.textContent="Add-ons: "+OPTS.map(o=>o.short+" "+Object.values(guests).filter(g=>g.status==="in"&&(g.optIns||[]).includes(o.key)).length).join(" · "); } }
   async function toggleOpt(k,on){ const cur=new Set(guests[meId]?.optIns||[]); on?cur.add(k):cur.delete(k); try{ await saveMine({optIns:[...cur],updatedAt:new Date().toISOString()}); flash("opt-status",on?"You're in. Saved.":"Removed.","ok"); }catch(e){ flash("opt-status",friendlyErr(e),"err"); } }
 
