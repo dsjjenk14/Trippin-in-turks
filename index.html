@@ -860,6 +860,8 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
 .bar-actions{position:static;display:flex;gap:14px}
 .player.spotify{display:block;padding:0;background:transparent;border:0;border-radius:12px;overflow:hidden;height:80px;bottom:calc(66px + env(safe-area-inset-bottom, 0px))}
 .player.spotify iframe{display:block;border:0;border-radius:12px}
+.anthem-embed{display:grid;gap:10px;justify-items:center}
+.anthem-embed iframe{border:0;border-radius:12px;display:block;max-width:100%}
 </style>
 
 </head>
@@ -906,6 +908,10 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
         <div class="board-row"><span>PROVIDENCIALES</span><span>WED MAY 19</span><span class="st" id="board-status">ON TIME</span></div>
       </div>
 
+      <section class="anthem-embed" aria-labelledby="anthem-h">
+        <span class="label" id="anthem-h">Trip anthem</span>
+        <iframe title="WNBA by Drake on Spotify" src="https://open.spotify.com/embed/track/6zZvy88xp6FIjJKhqwnJeQ?utm_source=generator&theme=0" width="100%" height="152" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+      </section>
       <div class="facts">
         <button class="fact" type="button" data-go="rsvp" hidden><span class="label">Crew</span><b id="f-crew">0 going</b><span>See who's in</span></button>
         <button class="fact" type="button" data-go="rsvp"><span class="label">RSVP by</span><b>Dec 30</b><span>Deposit 7 days after</span></button>
