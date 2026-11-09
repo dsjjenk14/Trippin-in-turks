@@ -6,7 +6,9 @@
 <meta name="description" content="Five nights in Grace Bay, Turks and Caicos. May 19 to 24, 2027.">
 <meta property="og:title" content="Trippin in Turks">
 <meta property="og:description" content="Five nights in Grace Bay. RSVP, vote on the villa and pay your share.">
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}.inst{grid-template-columns:auto 1fr auto auto}
+.paybtn{grid-column:2 / -1;justify-self:start;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;background:var(--navy)!important;color:var(--on-navy)!important;border-color:var(--navy)!important;min-height:36px;padding:0 12px;white-space:nowrap}
+</style>
 <title>Trippin in Turks</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&family=DM+Mono:wght@400;500&family=Great+Vibes&display=swap">
@@ -1200,8 +1202,14 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
     <section class="screen" data-view="host" hidden>
       <div class="head"><span class="label">Only you see this</span><h1>Host tools</h1><p>Add your Stripe link, confirm payments, and add photos from any card.</p></div>
       <form id="stripe-form" class="card list" novalidate>
-        <div class="field"><label class="fl" for="stripe">Stripe payment link</label><input type="url" id="stripe" placeholder="https://buy.stripe.com/..."></div>
-        <button class="btn navy block" type="submit">Save link</button>
+        <span class="label">Stripe payment links</span>
+        <p class="note">One link per amount. Turn on "Let customers adjust quantity" in Stripe so plus ones can choose 2.</p>
+        <div class="field"><label class="fl" for="pl-dep">Deposit · $200</label><input type="url" id="pl-dep" placeholder="https://buy.stripe.com/..."></div>
+        <div class="field"><label class="fl" for="pl-p12">Payments 1 and 2 · $286</label><input type="url" id="pl-p12" placeholder="https://buy.stripe.com/..."></div>
+        <div class="field"><label class="fl" for="pl-p3">Payment 3 · $287</label><input type="url" id="pl-p3" placeholder="https://buy.stripe.com/..."></div>
+        <div class="field"><label class="fl" for="pl-final">Final payment · $362 (includes $75 damage deposit)</label><input type="url" id="pl-final" placeholder="https://buy.stripe.com/..."></div>
+        <div class="field"><label class="fl" for="stripe">Custom amount link (optional)</label><input type="url" id="stripe" placeholder="https://buy.stripe.com/..."></div>
+        <button class="btn navy block" type="submit">Save links</button>
         <p class="status" id="stripe-status" role="status"></p>
         <details class="more"><summary>Chargeback protection setup</summary><ul>
           <li>In your Stripe Payment Link, turn on <b>Require customers to accept your terms of service</b> and use this site's link as the terms URL.</li>
@@ -1524,6 +1532,9 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
     if(!P){ $("#share-total").textContent="--"; $("#share-sub").textContent=(db&&meId)?"The payment plan is coming soon.":"Sign in to see your payment plan."; $("#f-share").textContent="--"; return; }
     (config.covers||[]).forEach(x=>covers.append(el("li",{text:x})));
     const {mine,m,ins,dep,share,paid,conf,paidAmt}=P;
+    const PL=config.payLinks||{}, insKeys=["p12","p12","p3","final"];
+    const payHref=u=>{ if(!u) return null; const q=new URLSearchParams(); if(mine.email) q.set("prefilled_email",mine.email); if(meId) q.set("client_reference_id",String(meId).replace(/[^A-Za-z0-9_-]/g,"")); return u+(u.includes("?")?"&":"?")+q.toString(); };
+    const payBtn=(u,amt)=>u?el("a",{class:"mini paybtn",href:payHref(u),target:"_blank",rel:"noopener",text:"Pay "+money(amt)}):null;
     $("#bal-label").textContent=m===2?"Your share, you + "+(mine.plusOne.name||"plus one"):"Your share";
     $("#share-total").textContent=money(share); $("#f-share").textContent=money(share);
     $("#share-sub").textContent=paidAmt>=share?"All paid. You're set!":`${money(paidAmt)} paid · ${money(share-paidAmt)} to go · all due by Apr 9`;
@@ -1531,11 +1542,13 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
     if(dep){ const due=depositDue(mine), late=due&&!mine.depositPaid&&Date.now()>due.getTime();
       const cb=el("input",{type:"checkbox",id:"paid-dep"}); cb.checked=!!mine.depositPaid; if(!db||!meId) cb.disabled=true; cb.addEventListener("change",()=>markDeposit(cb.checked));
       const sub=mine.depositConfirmed?"Confirmed by Dominique":mine.depositPaid?"Marked paid · waiting on confirmation":due?(late?`Overdue · was due ${fmtDate(due)}`:`Due ${fmtDate(due)}, 7 days after you RSVP'd`):"Due within 7 days of tapping RSVP";
-      list.append(el("div",{class:"inst"+(mine.depositPaid?" done":"")+(late?" late":"")},[cb,el("label",{for:"paid-dep"},[document.createTextNode("Deposit"),el("span",{class:"when",text:sub})]),el("span",{class:"amt",text:money(dep)})])); }
+      list.append(el("div",{class:"inst"+(mine.depositPaid?" done":"")+(late?" late":"")},[cb,el("label",{for:"paid-dep"},[document.createTextNode("Deposit"),el("span",{class:"when",text:sub})]),el("span",{class:"amt",text:money(dep)}),(!mine.depositPaid&&!mine.depositConfirmed)?payBtn(PL.dep,dep):null])); }
     ins.forEach((x,i)=>{ const id="paid-"+i, cb=el("input",{type:"checkbox",id}); cb.checked=!!paid[i]; if(!db||!meId) cb.disabled=true; cb.addEventListener("change",()=>markPaid(i,cb.checked));
       const sub=conf[i]?"Confirmed by Dominique":paid[i]?"Marked paid · waiting on confirmation":"Due "+fmtDate(x.due);
-      list.append(el("div",{class:"inst"+(paid[i]?" done":"")},[cb,el("label",{for:id},[document.createTextNode(x.label),el("span",{class:"when",text:sub})]),el("span",{class:"amt",text:money(x.amount)})])); });
-    const slot=$("#pay-btn-slot"); slot.replaceChildren(); slot.append(config.stripeUrl?el("a",{class:"btn block",href:config.stripeUrl,target:"_blank",rel:"noopener",text:"Pay with Stripe"}):el("p",{class:"note",style:"color:inherit;opacity:.8",text:"Payment link coming soon."})); }
+      list.append(el("div",{class:"inst"+(paid[i]?" done":"")},[cb,el("label",{for:id},[document.createTextNode(x.label),el("span",{class:"when",text:sub})]),el("span",{class:"amt",text:money(x.amount)}),(!paid[i]&&!conf[i])?payBtn(PL[insKeys[i]],x.amount+(i===ins.length-1?75*m:0)):null])); });
+    if(m===2&&Object.values(PL).some(Boolean)) list.append(el("p",{class:"note",text:"Paying for two? Set the quantity to 2 at checkout."}));
+    const slot=$("#pay-btn-slot"); slot.replaceChildren(); const anyPL=Object.values(PL).some(Boolean);
+    slot.append(anyPL?el("p",{class:"note",style:"color:inherit;opacity:.85",text:"Tap Pay next to any payment below. After paying, you'll come right back here to check it off."}):config.stripeUrl?el("a",{class:"btn block",href:config.stripeUrl,target:"_blank",rel:"noopener",text:"Pay with Stripe"}):el("p",{class:"note",style:"color:inherit;opacity:.8",text:"Payment link coming soon."})); }
   async function markDeposit(v){ try{ await saveMine({depositPaid:v,updatedAt:new Date().toISOString(),log:logFor(meId,v?"Marked deposit as paid":"Unmarked deposit")}); flash("pay-status",v?"Deposit marked as paid. Thank you!":"Unmarked.","ok"); }catch(e){ flash("pay-status",friendlyErr(e),"err"); renderPay(); } }
   async function markPaid(i,v){ const n=config?.installments?.length||4, paid=Array.isArray(guests[meId]?.paid)?guests[meId].paid.slice():[]; while(paid.length<n) paid.push(false); paid[i]=v;
     try{ await saveMine({paid,updatedAt:new Date().toISOString(),log:logFor(meId,(v?"Marked payment ":"Unmarked payment ")+(i+1)+" as paid")}); flash("pay-status",v?"Marked as paid. Thank you!":"Unmarked.","ok"); }catch(e){ flash("pay-status",friendlyErr(e),"err"); renderPay(); } }
@@ -1554,6 +1567,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
   // Host
   function renderHost(){ $("#host-link").hidden=!isOwner; if(!isOwner) return;
     if(config?.stripeUrl&&document.activeElement!==$("#stripe")) $("#stripe").value=config.stripeUrl;
+    const PL=config?.payLinks||{}; [["pl-dep","dep"],["pl-p12","p12"],["pl-p3","p3"],["pl-final","final"]].forEach(([fid,k])=>{ if(PL[k]&&document.activeElement!==$("#"+fid)) $("#"+fid).value=PL[k]; });
     const body=$("#roster"); body.replaceChildren(); const ids=Object.keys(guests);
     if(!ids.length){ body.append(el("tr",{},[el("td",{colspan:"6",text:"No RSVPs yet."})])); return; }
     const n=config?.installments?.length||4;
@@ -1567,8 +1581,9 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
   async function toggleDeposit(id){ try{ await db.doc("guests/"+id).update({depositConfirmed:!guests[id].depositConfirmed,log:logFor(id,!guests[id].depositConfirmed?"Dominique confirmed deposit received":"Dominique unconfirmed deposit")}); }catch(e){ flash("stripe-status",friendlyErr(e),"err"); } }
   async function saveConfig(f){ const ref=db.doc("config/trip"); if(config) await ref.update(f); else await ref.set(f); }
   $("#stripe-form").addEventListener("submit",async ev=>{ ev.preventDefault(); const url=$("#stripe").value.trim();
-    if(url&&!/^https:\/\//.test(url)) return flash("stripe-status","Paste the full link, starting with https://","err");
-    try{ await saveConfig({stripeUrl:url}); flash("stripe-status","Saved. Friends now see a Pay with Stripe button.","ok"); }catch(e){ flash("stripe-status",friendlyErr(e),"err"); } });
+    const payLinks={dep:$("#pl-dep").value.trim(),p12:$("#pl-p12").value.trim(),p3:$("#pl-p3").value.trim(),final:$("#pl-final").value.trim()};
+    if([url,...Object.values(payLinks)].some(u=>u&&!/^https:\/\//.test(u))) return flash("stripe-status","Paste each full link, starting with https://","err");
+    try{ await saveConfig({stripeUrl:url,payLinks}); flash("stripe-status","Saved. Friends now see a Pay button on each payment.","ok"); }catch(e){ flash("stripe-status",friendlyErr(e),"err"); } });
   $("#file-pick").addEventListener("change",async ev=>{ const f=ev.target.files?.[0]; ev.target.value=""; if(!f||!uploadKey||!assets) return; const key=uploadKey; uploadKey=null;
     try{ const r=await assets.upload(f); await saveConfig({photos:{[key]:r.id}}); }catch(e){ flash("stripe-status",e?.message?"Upload failed: "+e.message:"Upload failed. Try a smaller image.","err"); } });
 
