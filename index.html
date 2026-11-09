@@ -915,6 +915,39 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
 @media (prefers-reduced-motion: reduce){.player.spotify{transition:none}}
 .invite-link{display:grid;gap:8px;padding:12px 0;border-bottom:1px solid var(--line)}
 .invite-url{margin:0;font-family:var(--mono);font-size:13px;word-break:break-all;background:var(--paper);padding:10px 12px}
+
+/* ===== Deposit celebration ===== */
+.cel{position:fixed;inset:0;z-index:200;display:grid;place-items:center;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));background:rgba(15,28,48,.42);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);overflow:hidden}
+.cel[hidden]{display:none!important}
+.cel-card{position:relative;width:min(360px,100%);background:var(--paper);color:var(--ink);border:1px solid var(--gold-soft);box-shadow:0 30px 60px -30px rgba(15,28,48,.6);padding:30px 24px 22px;text-align:center;overflow:hidden}
+.cel-card::before{content:"";position:absolute;inset:8px;border:1px solid var(--gold-soft);pointer-events:none}
+.cel-label{font-family:var(--body);font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold-ink)}
+.cel-card h2{font-family:var(--display);font-weight:400;font-size:38px;line-height:1.05;margin:10px 0 10px;text-wrap:balance}
+.cel-card p{font-size:14px;line-height:1.6;color:var(--muted);margin:0 0 18px}
+.cel-route{display:flex;align-items:center;gap:10px;justify-content:center;font-family:"DM Mono",ui-monospace,monospace;font-size:13px;letter-spacing:.12em;margin:4px 0 18px}
+.cel-route b{font-weight:500;font-size:22px;letter-spacing:.06em}
+.cel-path{position:relative;flex:1;max-width:130px;height:24px}
+.cel-path::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:1px dashed var(--gold)}
+.cel-plane{position:absolute;top:50%;left:0;transform:translate(-50%,-50%);color:var(--navy);font-size:16px;line-height:1}
+.cel-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:18px;font-family:"DM Mono",ui-monospace,monospace}
+.cel-meta small{display:block;font-size:9px;letter-spacing:.2em;color:var(--muted)}
+.cel-meta span{font-size:12px;letter-spacing:.08em}
+.cel-stamp{position:relative;display:inline-block;margin:0 0 14px;border:2px solid var(--mint-ink);color:var(--mint-ink);font-family:"DM Mono",ui-monospace,monospace;font-size:12px;letter-spacing:.18em;padding:6px 10px;transform:rotate(-12deg);background:color-mix(in srgb,var(--paper) 70%,transparent);opacity:.92}
+.cel-conf{position:absolute;inset:0;pointer-events:none}
+.cel-conf i{position:absolute;top:-20px;width:8px;height:12px;border-radius:2px;opacity:0}
+@media (prefers-reduced-motion: no-preference){
+  .cel.show{animation:celfade .3s ease both}
+  .cel.show .cel-card{animation:celpop .65s cubic-bezier(.2,1.3,.4,1) both}
+  .cel.show .cel-plane{animation:celfly 2.2s ease-in-out .5s both}
+  .cel.show .cel-stamp{animation:celstamp .45s cubic-bezier(.3,1.6,.5,1) 1.3s both}
+  .cel.show .cel-conf i{animation:celfall var(--d,3s) ease-in var(--w,0s) both}
+  @keyframes celfade{from{opacity:0}}
+  @keyframes celpop{from{opacity:0;transform:translateY(40px) scale(.9)}}
+  @keyframes celfly{from{left:0}to{left:100%}}
+  @keyframes celstamp{from{opacity:0;transform:rotate(-12deg) scale(2.4)}}
+  @keyframes celfall{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:.9;transform:translate(var(--x,0),110vh) rotate(var(--r,540deg))}}
+}
+@media (prefers-reduced-motion: reduce){.cel-plane{left:100%}}
 </style>
 
 </head>
@@ -1099,6 +1132,18 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
       </section>
     </section>
 
+    <div class="cel" id="cel" role="dialog" aria-modal="true" aria-labelledby="cel-h" hidden>
+  <div class="cel-conf" id="cel-conf" aria-hidden="true"></div>
+  <div class="cel-card">
+    <span class="cel-label" id="cel-label">Deposit received</span>
+    <h2 id="cel-h">You're booked!</h2>
+    <div class="cel-route" aria-hidden="true"><b>DC</b><span class="cel-path"><span class="cel-plane">✈</span></span><b>PLS</b></div>
+    <div class="cel-meta" aria-hidden="true"><div><small>DEPARTS</small><span>MAY 19</span></div><div><small>GATE</small><span>GRACE BAY</span></div><div><small>SEAT</small><span>VILLA</span></div></div>
+    <span class="cel-stamp" id="cel-stamp" aria-hidden="true">CONFIRMED</span>
+    <p id="cel-p">Your spot in Grace Bay is officially locked in.</p>
+    <button class="btn block" type="button" id="cel-go">Let's go</button>
+  </div>
+</div>
     <!-- RSVP -->
     <section class="screen" data-view="rsvp" hidden>
       <div class="head"><span class="label">RSVP by Dec 30</span><h1>Are you in?</h1><p>A $200 deposit is due within 7 days of your RSVP.</p></div>
@@ -1852,7 +1897,36 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
         el("button",{type:"button",class:"mini",text:"Copy",onclick:()=>copyText(t,"remind-status")})])); });
     if(!all.length) box.append(el("p",{class:"note",text:"Nobody owes anything right now."}));
     $("#remind-all").hidden=!all.length; $("#remind-all").onclick=()=>copyText(all.join("\n\n"),"remind-status"); }
-  function renderAll(){ renderRemind(); renderIns(); renderSplit(); renderTabs(); renderOpts(); renderVillas(); renderPlan(); renderPay(); renderCrew(); renderHost(); fillForm(); renderNext(); prune(); }
+
+  // Celebration when the deposit (and later, the last payment) goes through
+  const celShown={};
+  function maybeCelebrate(){ const g=meId&&guests[meId]; if(!g||g.status!=="in"||!config) return;
+    const cel=g.celebrated||{}; const n=(config.installments||[]).length;
+    const dep=!!(g.depositPaid||g.depositConfirmed);
+    const full=dep&&n>0&&Array.from({length:n},(_,i)=>(g.paid||[])[i]||(g.confirmed||[])[i]).every(Boolean);
+    let lsDone={}; try{ lsDone=JSON.parse(localStorage.getItem("tt_cel")||"{}"); }catch(_){}
+    const k=full&&!cel.full&&!lsDone.full?"full":dep&&!cel.deposit&&!lsDone.deposit&&!full?"deposit":null;
+    if(!k||celShown[k]) return; celShown[k]=true;
+    try{ lsDone[k]=1; localStorage.setItem("tt_cel",JSON.stringify(lsDone)); }catch(_){}
+    saveMine({celebrated:{...cel,[k]:new Date().toISOString()}}).catch(()=>{});
+    const two=!!g.plusOne, first=(g.nickname||"").split(" ")[0];
+    const next=(config.installments||[])[0];
+    if(k==="deposit"){ $("#cel-label").textContent="Deposit received"; $("#cel-h").textContent=first?`You're booked, ${first}!`:"You're booked!";
+      $("#cel-p").textContent=(two?"You and your plus one are officially locked in for Grace Bay.":"Your spot in Grace Bay is officially locked in.")+(next?` Next up is ${next.label.toLowerCase()} on ${fmtDate(next.due)}, and you'll be added to the group chat when it goes live in December.`:"");
+      $("#cel-stamp").textContent="CONFIRMED"; $("#cel-go").textContent="Let's go"; }
+    else { $("#cel-label").textContent="Paid in full"; $("#cel-h").textContent="All paid up!";
+      $("#cel-p").textContent="That's everything. All that's left is packing your peach and brown and counting down the days. Your damage deposit comes back by June 8."; $("#cel-stamp").textContent="PAID IN FULL"; $("#cel-go").textContent="Can't wait"; }
+    const conf=$("#cel-conf"); conf.replaceChildren(); const cols=["var(--mint)","var(--blush)","var(--gold)","var(--gold-soft)","var(--sky)"];
+    for(let i=0;i<42;i++){ const c=document.createElement("i"); c.style.left=Math.random()*100+"%"; c.style.background=cols[i%cols.length];
+      c.style.setProperty("--d",(2.4+Math.random()*1.8).toFixed(2)+"s"); c.style.setProperty("--w",(Math.random()*.9).toFixed(2)+"s");
+      c.style.setProperty("--x",((Math.random()-.5)*160).toFixed(0)+"px"); c.style.setProperty("--r",((Math.random()>.5?1:-1)*(300+Math.random()*500)).toFixed(0)+"deg");
+      if(i%3===0){ c.style.width="7px"; c.style.height="7px"; c.style.borderRadius="50%"; } conf.append(c); }
+    const box=$("#cel"); box.hidden=false; box.classList.remove("show"); void box.offsetWidth; box.classList.add("show"); setTimeout(()=>$("#cel-go").focus(),50); }
+  function closeCel(){ const box=$("#cel"); box.classList.remove("show"); box.hidden=true; }
+  $("#cel-go").addEventListener("click",closeCel);
+  $("#cel").addEventListener("click",e=>{ if(e.target.id==="cel") closeCel(); });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&!$("#cel").hidden) closeCel(); });
+  function renderAll(){ renderRemind(); renderIns(); renderSplit(); renderTabs(); renderOpts(); renderVillas(); renderPlan(); renderPay(); renderCrew(); renderHost(); fillForm(); renderNext(); prune(); maybeCelebrate(); }
   renderAll(); show();
 
   (async()=>{ try{ db=await window.claude?.use("db"); }catch(_){ db=null; } try{ user=await window.claude?.use("user"); }catch(_){ user=null; }
