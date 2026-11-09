@@ -1007,6 +1007,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
 .plus-sign .ps-link{font-family:"DM Mono",ui-monospace,monospace;font-size:12px;word-break:break-all;background:var(--paper);border:1px solid var(--line);padding:8px 10px}
 .plus-sign .ps-btns{display:flex;gap:8px;flex-wrap:wrap}
 
+input[type=password]{width:100%;font:inherit;min-height:48px;color:var(--ink);border-radius:0;background:transparent;border:0;border-bottom:1px solid var(--line);padding:12px 0;font-weight:300;outline-offset:2px}
 /* iPhones zoom in on inputs under 16px and stay zoomed */
 input,select,textarea{font-size:16px!important}
 </style>
@@ -1201,7 +1202,7 @@ input,select,textarea{font-size:16px!important}
         <p class="note" id="signin-msg">It's in the text Dominique sent you. Enter it once and you're in.</p>
         <form id="code-form" class="signin-row" novalidate><input type="text" id="code-input" placeholder="TRIP CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Trip code"><button class="btn" type="submit">Join</button></form>
         <form id="rejoin-form" class="rejoin" novalidate hidden><input type="email" id="rejoin-email" placeholder="Email you RSVP'd with" autocomplete="email" aria-label="Email you RSVP'd with"><input type="text" id="rejoin-code" placeholder="TRIP CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Trip code"><button class="btn block" type="submit">Get back in</button></form>
-        <form id="signin-form" class="rejoin" novalidate hidden><input type="email" id="signin-email" placeholder="info@trippinturks.com" autocomplete="username" aria-label="Your email"><input type="password" id="signin-pass" placeholder="Password" autocomplete="current-password" aria-label="Password"><button class="btn block" type="submit">Sign in</button><button type="button" class="link-btn" id="send-link">Email me a sign-in link instead</button></form>
+        <form id="signin-form" class="rejoin" novalidate hidden><input type="email" id="signin-email" placeholder="Email" autocomplete="username" aria-label="Your email"><input type="password" id="signin-pass" placeholder="Password" autocomplete="current-password" aria-label="Password"><button class="btn block" type="submit">Sign in</button><button type="button" class="link-btn" id="send-link">Email me a sign-in link instead</button></form>
         <button type="button" class="link-btn" id="lock-toggle">Already RSVP'd on another phone? Get back in</button>
         <button type="button" class="link-btn" id="host-toggle" style="font-size:12px;opacity:.75">Host sign-in</button>
       </div>
