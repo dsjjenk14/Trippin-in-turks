@@ -134,13 +134,16 @@ window.TT_CONFIG = {
       $("#code-form").hidden = m !== "code"; $("#rejoin-form").hidden = m !== "rejoin"; $("#signin-form").hidden = m !== "email";
       $("#lock-title").textContent = MODES[m][0]; $("#signin-msg").textContent = MODES[m][1];
       $("#lock-toggle").hidden = false; $("#lock-toggle").textContent = m === "code" ? "Already RSVP'd on another phone? Get back in" : "First time here? Enter your trip code";
-      $("#host-toggle").hidden = m === "email"; };
+      $("#host-toggle").hidden = m === "email"; const o = $("#otp-row"); if (o && m !== "email") o.hidden = true; };
     const showEmail = on => setMode(on ? "email" : "code");
     const tg = $("#lock-toggle"); if (tg) tg.addEventListener("click", () => setMode(mode === "code" ? "rejoin" : "code"));
     const ht = $("#host-toggle"); if (ht) ht.addEventListener("click", () => setMode("email"));
     const realUser = st.session && !st.session.user.is_anonymous;
-    if (btn) { btn.hidden = !!(st.session && st.session.user.is_anonymous); btn.textContent = realUser ? "Sign out" : "Sign in";
-      btn.addEventListener("click", async () => { if (realUser) { await st.sb.auth.signOut(); location.reload(); } else { location.hash = "rsvp"; setMode("code"); setTimeout(() => $("#code-input") && $("#code-input").focus(), 200); } }); }
+    const anon = !!(st.session && st.session.user.is_anonymous);
+    if (btn) { btn.hidden = false; btn.textContent = realUser ? "Sign out" : "Sign in";
+      btn.addEventListener("click", async () => { if (realUser) { await st.sb.auth.signOut(); location.reload(); }
+        else if (anon) { location.hash = "rsvp"; setMode("email"); setTimeout(() => $("#signin-email") && $("#signin-email").focus(), 200); }
+        else { location.hash = "rsvp"; setMode("code"); setTimeout(() => $("#code-input") && $("#code-input").focus(), 200); } }); }
     const rf = $("#rejoin-form");
     if (rf) rf.addEventListener("submit", async e => { e.preventDefault(); const em = $("#rejoin-email").value.trim(), code = $("#rejoin-code").value.trim(), msg = $("#signin-msg");
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { msg.textContent = "Enter the email you RSVP'd with."; return; }
@@ -168,7 +171,17 @@ window.TT_CONFIG = {
     if (f) f.addEventListener("submit", async e => { e.preventDefault(); const email = $("#signin-email").value.trim(); const msg = $("#signin-msg");
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.textContent = "Enter a valid email."; return; }
       const { error } = await st.sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname + (tripCode ? "?code=" + encodeURIComponent(tripCode) : "") } });
-      msg.textContent = error ? "That didn't send. Try again in a minute." : "Check your email for your sign-in link. You can close this tab."; });
+      if (error) { msg.textContent = "That didn't send. Wait a minute and try again."; return; }
+      msg.textContent = "Check your email. Type the 6-digit code from it below, or tap the link in the email.";
+      let row = $("#otp-row"); if (!row) { row = document.createElement("form"); row.id = "otp-row"; row.className = "signin-row"; row.noValidate = true;
+        row.innerHTML = '<input type="text" id="otp-code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="6-digit code" aria-label="Sign-in code"><button class="btn" type="submit">Sign in</button>';
+        f.after(row);
+        row.addEventListener("submit", async ev => { ev.preventDefault(); const token = $("#otp-code").value.replace(/\s/g, ""); if (!token) return;
+          const bt = row.querySelector("button"); bt.disabled = true; msg.textContent = "Checking…";
+          const r = await st.sb.auth.verifyOtp({ email: $("#signin-email").value.trim(), token, type: "email" });
+          if (r.error) { bt.disabled = false; msg.textContent = "That code didn't work. Use the newest email, or send a new code."; return; }
+          location.hash = ""; location.reload(); }); }
+      row.hidden = false; setTimeout(() => $("#otp-code") && $("#otp-code").focus(), 100); });
     if (authErr && !realUser) { location.hash = "rsvp"; setMode("email"); $("#signin-msg").textContent = "That sign-in link didn't work (" + authErr.replace(/\+/g, " ") + "). Send yourself a new one below and tap the newest email."; }
     window.TT_SHOW_CODE_FORM = () => { setMode("code"); $("#lock-toggle").hidden = true; };
     if (st.session && window.TT_NOT_INVITED) window.TT_SHOW_CODE_FORM();
@@ -994,6 +1007,9 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
 .plus-sign{display:grid;gap:10px}
 .plus-sign .ps-link{font-family:"DM Mono",ui-monospace,monospace;font-size:12px;word-break:break-all;background:var(--paper);border:1px solid var(--line);padding:8px 10px}
 .plus-sign .ps-btns{display:flex;gap:8px;flex-wrap:wrap}
+
+/* iPhones zoom in on inputs under 16px and stay zoomed */
+input,select,textarea{font-size:16px!important}
 </style>
 
 </head>
