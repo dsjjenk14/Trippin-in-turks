@@ -1125,7 +1125,7 @@ input,select,textarea{font-size:16px!important}
               <li><b>Thursday:</b> casual and comfy for Fish Fry, then cute for the bar hop.</li>
               <li><b>Friday:</b> dress up. Resort chic for Coco Bistro, then Blu Bar and Aziza.</li>
               <li><b>Saturday:</b> peach or brown for picture day, then dress up for DelMar and Shisha Lounge.</li>
-              <li><b>Sunday:</b> swimsuit and cover-up for the boat to Noah's Ark, then something comfy for the glow worm cruise or Mr. Grouper's.</li>
+              <li><b>Sunday:</b> swimsuit and cover-up for the boat to Noah's Ark, then something easy for Mr. Grouper's.</li>
             </ul></details>
           <details class="gtk-item"><summary><span class="gi">+</span><span><b>In case of emergency</b><small>Who to call</small></span></summary>
             <ul>
@@ -1337,7 +1337,6 @@ input,select,textarea{font-size:16px!important}
         <li>Your flight, about $500 round trip</li>
         <li>Water taxi and drinks at Captain Oak's</li>
         <li>Dinners and nights out</li>
-        <li>Glow worm cruise if you join, about $134</li>
         <li>Paddleboards, and jet cars if you join</li>
       </ul></details>
       <details class="more terms" id="terms"><summary>Terms, waiver and policies</summary>
@@ -1416,7 +1415,6 @@ input,select,textarea{font-size:16px!important}
         <div class="field"><label class="fl" for="stripe">Custom amount link (optional)</label><input type="url" id="stripe" placeholder="https://buy.stripe.com/..."></div>
         <span class="label" style="margin-top:8px">Add-on payment links</span>
         <p class="note">One Stripe link per add-on, with "Let customers adjust quantity" on. The price can't be the same as a trip payment ($200, $286, $287 or $362), so the site can tell them apart.</p>
-        <div class="field"><label class="fl" for="ao-glow-price">Glow worm cruise · price per person</label><input type="text" inputmode="decimal" id="ao-glow-price" placeholder="$ amount, card fees included"><input type="url" id="ao-glow-link" placeholder="https://buy.stripe.com/..." aria-label="Glow worm cruise payment link"></div>
         <div class="field"><label class="fl" for="ao-jetcars-price">Jet cars · price per person</label><input type="text" inputmode="decimal" id="ao-jetcars-price" placeholder="$ amount, card fees included"><input type="url" id="ao-jetcars-link" placeholder="https://buy.stripe.com/..." aria-label="Jet cars payment link"></div>
         <button class="btn navy block" type="submit">Save links</button>
         <p class="status" id="stripe-status" role="status"></p>
@@ -1553,7 +1551,6 @@ input,select,textarea{font-size:16px!important}
     {key:"boat", day:"Fri", title:"Captain Oak's", blurb:"Floating tiki bar. Wade around with a drink."},
     {key:"kayak", day:"Sat", title:"Clear kayaks", blurb:"See-through kayaks over the mangroves."},
     {key:"picnic", day:"Sat", title:"Styled beach picnic", blurb:"Picture day! Wear a peach or brown outfit. Set up by island decorators."},
-    {key:"glow", day:"Sun", title:"Glow worm cruise", blurb:"Optional. Sunday is a glow night, three nights after the full moon."},
     {key:"noahs", day:"Sun", title:"Noah's Ark by boat", blurb:"Our own boat to the Sunday party."},
     {key:"night", day:"Nights", title:"Shisha + Aziza", blurb:"Drake's two spots."}
   ];
@@ -1562,7 +1559,7 @@ input,select,textarea{font-size:16px!important}
     {d:"Thu", date:"20", items:[["10:30 AM","Chalk Sound paddleboarding","Glassy turquoise lagoon"],["1:00 PM","Las Brisas","Lunch on the deck over Chalk Sound"],["3:00 PM","Shop and explore","Regent Village, Saltmills and the Grace Bay plazas"],["4:00 PM","Villa time","Pool, naps, nothing planned"],["7:30 PM","Thursday Fish Fry","Stubbs Diamond Plaza",1],["10:00 PM","Grace Bay bar hop","Bars along Grace Bay Road, close together"]]},
     {d:"Fri", date:"21", items:[["10:30 AM","Breakfast at Shay Café","Omelettes, crepes, smoothies"],["12:00 PM","Grace Bay beach day","Loungers, umbrellas, swim if you feel like it"],["2:00 PM","Captain Oak's","Floating tiki bar by water taxi",1],["4:30 PM","Villa time","Pool, music, naps"],["7:30 PM","Coco Bistro","Fancy dinner under the palms"],["10:00 PM","Blu Bar, then Aziza","Night out"]]},
     {d:"Sat", date:"22", items:[["10:30 AM","Clear kayaks","Clear Wave, Leeward"],["1:00 PM","Beach picnic · picture day","Styled setup and drone shoot. Wear peach or brown.",1],["3:00 PM","Villa afternoon","Massages, games, nothing booked"],["7:30 PM","DelMar at The Strand","Big dinner night"],["10:30 PM","Shisha Lounge","Saturday night out"]]},
-    {d:"Sun", date:"23", items:[["Morning","Sleep in","Long day, no alarms"],["11:00 AM","Chef brunch at the villa","Made for us"],["1:00 PM","Jet cars","Shipwreck and Half Moon Bay","opt"],["2:15 PM","Private boat to Noah's Ark","Sunday DJ party",1],["5:30 PM","Villa time","Rinse off from the boat"],["6:45 PM","Glow worm cruise","Sunset, drinks, then the water lights up around 8:45","opt"],["7:30 PM","Mr. Grouper's","Easy dinner, local seafood, if you skip the cruise"],["10:30 PM","Game night at the villa","Cards, Uno, Taboo"]]},
+    {d:"Sun", date:"23", items:[["Morning","Sleep in","Long day, no alarms"],["11:00 AM","Chef brunch at the villa","Made for us"],["1:00 PM","Jet cars","Shipwreck and Half Moon Bay","opt"],["2:15 PM","Private boat to Noah's Ark","Sunday DJ party",1],["5:30 PM","Villa time","Rinse off from the boat"],["7:30 PM","Mr. Grouper's","Easy dinner, local seafood"],["10:30 PM","Game night at the villa","Cards, Uno, Taboo"]]},
     {d:"Mon", date:"24", items:[["10:30 AM","Brunch at the villa","And a last swim"],["11:30 AM","Check out","Or a late checkout until 2"],["Afternoon","Airport rides","Grouped by flight time from your RSVP."]]}
   ];
   const VIEWS=["home","rsvp","stay","plan","pay","info","host"];
@@ -1665,7 +1662,7 @@ input,select,textarea{font-size:16px!important}
     const tl=$("#timeline"); tl.replaceChildren();
     DAYS[activeDay].items.forEach(([tm,title,sub,flag])=>tl.append(el("div",{class:"stop"+(flag===1?" hl":"")},[el("div",{class:"t",text:tm}),el("div",{class:"rail"}),el("div",{class:"body"},[el("b",{},[document.createTextNode(title),flag==="opt"?el("span",{class:"opt",text:"OPTIONAL"}):null]),sub?el("span",{text:sub}):null])]))); }
 
-  const SHORT={rockhouse:"Rock House",fireshow:"Fire show",villa:"Villa life",fishfry:"Fish Fry",boat:"Captain Oak's",kayak:"Kayaks",picnic:"Picnic",glow:"Glow worms",noahs:"Noah's Ark",night:"Nightlife"};
+  const SHORT={rockhouse:"Rock House",fireshow:"Fire show",villa:"Villa life",fishfry:"Fish Fry",boat:"Captain Oak's",kayak:"Kayaks",picnic:"Picnic",noahs:"Noah's Ark",night:"Nightlife"};
   let sheetFor=null, lastFocus=null;
   const DAYMAP={Wed:0,Thu:1,Fri:2,Sat:3,Sun:4,Mon:5};
   function openSheet(a,i){ sheetFor=a; lastFocus=document.activeElement; const ph=$("#sheet-ph"); ph.replaceChildren(photoBox("act_"+a.key,i+1));
@@ -1824,7 +1821,7 @@ input,select,textarea{font-size:16px!important}
   // Host
   function renderHost(){ $("#host-link").hidden=!isOwner; if(!isOwner) return;
     if(config?.stripeUrl&&document.activeElement!==$("#stripe")) $("#stripe").value=config.stripeUrl;
-    const AO=config?.addons||{}; ["glow","jetcars"].forEach(k=>{ const a=AO[k]||{}; if(a.price&&document.activeElement!==$("#ao-"+k+"-price")) $("#ao-"+k+"-price").value=a.price; if(a.link&&document.activeElement!==$("#ao-"+k+"-link")) $("#ao-"+k+"-link").value=a.link; });
+    const AO=config?.addons||{}; ["jetcars"].forEach(k=>{ const a=AO[k]||{}; if(a.price&&document.activeElement!==$("#ao-"+k+"-price")) $("#ao-"+k+"-price").value=a.price; if(a.link&&document.activeElement!==$("#ao-"+k+"-link")) $("#ao-"+k+"-link").value=a.link; });
     const PL=config?.payLinks||{}; [["pl-dep","dep"],["pl-p12","p12"],["pl-p3","p3"],["pl-final","final"]].forEach(([fid,k])=>{ if(PL[k]&&document.activeElement!==$("#"+fid)) $("#"+fid).value=PL[k]; });
     const body=$("#roster"); body.replaceChildren(); const ids=Object.keys(guests);
     if(!ids.length){ body.append(el("tr",{},[el("td",{colspan:"6",text:"No RSVPs yet."})])); return; }
@@ -1842,7 +1839,7 @@ input,select,textarea{font-size:16px!important}
     const payLinks={dep:$("#pl-dep").value.trim(),p12:$("#pl-p12").value.trim(),p3:$("#pl-p3").value.trim(),final:$("#pl-final").value.trim()};
     if([url,...Object.values(payLinks)].some(u=>u&&!/^https:\/\//.test(u))) return flash("stripe-status","Paste each full link, starting with https://","err");
     const addons={}, taken=[200,286,287,362].flatMap(x=>[x,x*2]);
-    for(const k of ["glow","jetcars"]){ const link=$("#ao-"+k+"-link").value.trim(), price=Math.round(parseFloat($("#ao-"+k+"-price").value.replace(/[^0-9.]/g,""))*100)/100;
+    for(const k of ["jetcars"]){ const link=$("#ao-"+k+"-link").value.trim(), price=Math.round(parseFloat($("#ao-"+k+"-price").value.replace(/[^0-9.]/g,""))*100)/100;
       if(link&&!/^https:\/\//.test(link)) return flash("stripe-status","Paste each full link, starting with https://","err");
       if(link&&!(price>0)) return flash("stripe-status","Add the price for each add-on link.","err");
       if(price>0&&(taken.includes(price)||taken.includes(price*2))) return flash("stripe-status",`An add-on can't cost ${money(price)} because that matches a trip payment. Change it by a dollar in Stripe and here.`,"err");
@@ -1855,7 +1852,7 @@ input,select,textarea{font-size:16px!important}
 
   $("#hero-img").src=IMGS.hero; $("#bg-img").src=IMGS.vibe_beach||IMGS.hero;
   (function vibe(){ const row=$("#vibe"); Object.keys(IMGS).filter(k=>k.startsWith("vibe_")).forEach(k=>row.append(el("img",{src:IMGS[k],alt:"",loading:"lazy"}))); })();
-  const OPTS=[{key:"glow",short:"Glow worm",title:"Glow worm cruise",sub:"Sun 6:45 PM · about $134"},{key:"jetcars",short:"Jet cars",title:"Jet cars",sub:"Sun 1:00 PM · about $250 each, 2 per car"},{key:"paddle",short:"Paddleboard",title:"Paddleboards at Chalk Sound",sub:"Thu 10:30 AM · rental paid there"}];
+  const OPTS=[{key:"jetcars",short:"Jet cars",title:"Jet cars",sub:"Sun 1:00 PM · about $250 each, 2 per car"},{key:"paddle",short:"Paddleboard",title:"Paddleboards at Chalk Sound",sub:"Thu 10:30 AM · rental paid there"}];
   function addonPaid(g,k){ const ao=config?.addons?.[k]; if(!ao||!ao.price) return 0; const hit=(g?.payments||[]).filter(p=>!p.matched&&[1,2,3,4].some(q=>Math.abs(p.amount-ao.price*q)<0.01)); return hit.reduce((t,p)=>t+p.amount,0); }
   function optsClosed(){ return Date.now()>new Date("2027-04-10T04:00:00Z").getTime(); } // end of April 9, Eastern
   function renderOpts(){ const box=$("#opt-list"); box.replaceChildren(); const mine=guests[meId]?.optIns||[]; const can=!!(db&&meId);
