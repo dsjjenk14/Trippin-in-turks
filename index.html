@@ -1275,7 +1275,7 @@ input,select,textarea{font-size:16px!important}
 
     <!-- STAY -->
     <section class="screen" data-view="stay" hidden>
-      <div class="head"><span class="label">Vote by Jan 5</span><h1>Pick our villa</h1><p>Totals for May 19 to 24, split six ways.</p></div>
+      <div class="head"><span class="label" id="vote-label">Vote by Dec 30</span><h1>Pick our villa</h1><p>Totals for May 19 to 24, split six ways.</p></div>
       <div class="list" id="villas"></div>
     </section>
 
@@ -1634,7 +1634,7 @@ input,select,textarea{font-size:16px!important}
       const locked=v.needs && count<v.needs; const n=tallies[v.key]||0, pct=total?Math.round(n/total*100):0, voted=myVote===v.key;
       const pp6=Math.round(v.total/6), pp8=Math.round(v.total/8);
       const meter=el("div",{class:"meter"},[el("i")]); meter.firstChild.style.width=pct+"%";
-      const btn=el("button",{type:"button",class:voted?"mini on":"mini",text:voted?"Your pick":"Vote","aria-pressed":String(voted),onclick:()=>castVote(v.key)});
+      const btn=el("button",{type:"button",class:voted?"mini on":"mini",text:voted?"Your pick":voteClosed()?"Closed":"Vote","aria-pressed":String(voted),disabled:voteClosed()&&!voted?"":null,onclick:()=>{ if(!voteClosed()) castVote(v.key); }});
       if(!db||!meId||locked) btn.disabled=true;
       const ph=photoBox("villa_"+v.key,i,v.needs?"Only if 8 RSVP":v.badge,!v.needs&&i===0); if(v.key==="ogbth") ph.querySelector(".badge")?.classList.add("mint");
       if(locked) ph.append(el("div",{class:"lock"},[el("span",{text:"🔒"}),el("span",{text:`Unlocks when 8 people RSVP. ${count} of 8 so far.`})]));
@@ -1645,7 +1645,7 @@ input,select,textarea{font-size:16px!important}
           el("div",{class:"vote-row"},[el("span",{class:"votes",text:n+(n===1?" vote":" votes")+(total?" · "+pct+"%":"")}),btn])])]));
     });
     let lead=null,best=0; for(const [k,n] of Object.entries(tallies)) if(n>best){best=n;lead=k;}
-    const leadV=VILLAS.find(v=>v.key===lead); $("#f-villa").textContent=leadV?leadV.name:"Vote now"; $("#f-villa-sub").textContent=leadV?`Leading with ${best} vote${best===1?"":"s"}`:"4 options";
+    const leadV=VILLAS.find(v=>v.key===lead); $("#f-villa").textContent=leadV?leadV.name:"Vote now"; $("#f-villa-sub").textContent=voteClosed()?(leadV?"Voting closed · our pick":"Voting closed"):leadV?`Leading with ${best} vote${best===1?"":"s"}`:"Vote by Dec 30"; if(voteClosed()) $("#vote-label").textContent="Voting closed";
   }
 
   function renderPlan(){ const acts=$("#acts"); acts.replaceChildren();
@@ -1755,7 +1755,8 @@ input,select,textarea{font-size:16px!important}
     try{ await saveMine(f); formDirty=false; sigDirty=false; setTimeout(()=>updateBook(true),50); const dep=(config?.deposit?.amount||0)*(plus?2:1), due=depositDue({rsvpInAt:guests[meId]?.rsvpInAt||f.rsvpInAt});
       flash("rsvp-status",dep&&!guests[meId]?.depositPaid?`You're in! Your ${money(dep)} deposit is due by ${fmtDate(due)}.`:"You're in. See you in Grace Bay!","ok"); }
     catch(e){ flash("rsvp-status",friendlyErr(e),"err"); } finally{ $("#rsvp-save").disabled=false; } });
-  async function castVote(k){ if(!db||!meId) return; try{ await saveMine({vote:k,updatedAt:new Date().toISOString()}); }catch(e){ flash("rsvp-status",friendlyErr(e),"err"); } }
+  function voteClosed(){ return Date.now()>new Date("2026-12-31T05:00:00Z").getTime(); } // end of Dec 30, Eastern
+  async function castVote(k){ if(!db||!meId||voteClosed()) return; try{ await saveMine({vote:k,updatedAt:new Date().toISOString()}); }catch(e){ flash("rsvp-status",friendlyErr(e),"err"); } }
 
   async function renderCrew(){ const ids=Object.keys(guests);
     if(user&&ids.length){ try{ profiles=await user.profiles(ids); }catch(_){} }
@@ -1807,7 +1808,7 @@ input,select,textarea{font-size:16px!important}
     if(!g||!g.status) return set("Your next step","RSVP by December 30","Hold your place in the villa","RSVP","#rsvp");
     if(g.status==="out") return set("Plans change?","You said you can't make it","Tap to RSVP if that changes","RSVP","#rsvp");
     if(P&&P.dep&&!g.depositPaid){ const due=depositDue(g); return set("Your next step",`Deposit ${money(P.dep)}`,due?`Due ${fmtDate(due)}`:"Due within 7 days","Pay","#pay"); }
-    if(!g.vote) return set("Your next step","Vote on the villa","Voting closes January 5","Vote","#stay");
+    if(!g.vote&&!voteClosed()) return set("Your next step","Vote on the villa","Voting closes December 30","Vote","#stay");
     if(P){ const i=P.ins.findIndex((x,k)=>!P.paid[k]); if(i>=0) return set("Next payment",`${money(P.ins[i].amount)} due ${fmtDate(P.ins[i].due)}`,`${money(P.share-P.paidAmt)} left of your share`,"Pay","#pay"); }
     set("You're all set","See you in Grace Bay","Check the plan anytime","Plan","#plan"); }
 
