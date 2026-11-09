@@ -1324,7 +1324,7 @@ input,select,textarea{font-size:16px!important}
         </ol>
       </div>
       <div class="list" id="inst-list"></div>
-      <div class="inst dmg"><span class="dot" aria-hidden="true">↺</span><div><b>Refundable damage deposit</b><span class="when">Due with your April 9 payment. Refunded by June 8, 2027, subject to deductions for any damage or additional fees.</span></div><span class="amt">$75</span></div>
+      <div class="inst dmg"><span class="dot" aria-hidden="true">↺</span><div><b>Refundable damage deposit</b><span class="when">Already included in your final April 9 payment above, so there's nothing extra to pay. Refunded by June 8, 2027, subject to deductions for any damage or additional fees.</span></div><span class="amt">$75 incl.</span></div>
       <div class="card list" id="ins-card">
         <span class="label">Travel insurance · required</span>
         <label class="toggle" for="ins-done"><input type="checkbox" id="ins-done"><span>I've bought travel insurance with medical coverage for this trip.</span></label>
@@ -1812,8 +1812,9 @@ input,select,textarea{font-size:16px!important}
       const sub=mine.depositConfirmed?"Paid and confirmed":mine.depositPaid?"Marked paid · waiting on confirmation":due?(late?`Overdue · was due ${fmtDate(due)}`:`Due ${fmtDate(due)}, 7 days after you RSVP'd`):"Due within 7 days of tapping RSVP";
       list.append(el("div",{class:"inst"+(mine.depositPaid?" done":"")+(late?" late":"")},[cb,el("label",{for:"paid-dep"},[document.createTextNode("Deposit"),el("span",{class:"when",text:sub})]),el("span",{class:"amt",text:money(dep)}),(!mine.depositPaid&&!mine.depositConfirmed)?payBtn(PL.dep,dep):null])); }
     ins.forEach((x,i)=>{ const id="paid-"+i, cb=el("input",{type:"checkbox",id}); cb.checked=!!paid[i]; if(!db||!meId) cb.disabled=true; cb.addEventListener("change",()=>markPaid(i,cb.checked));
-      const sub=conf[i]?"Paid and confirmed":paid[i]?"Marked paid · waiting on confirmation":"Due "+fmtDate(x.due);
-      list.append(el("div",{class:"inst"+(paid[i]?" done":"")},[cb,el("label",{for:id},[document.createTextNode(x.label),el("span",{class:"when",text:sub})]),el("span",{class:"amt",text:money(x.amount)}),(!paid[i]&&!conf[i])?payBtn(PL[insKeys[i]],x.amount+(i===ins.length-1?75*m:0)):null])); });
+      const last=i===ins.length-1, dmg=last?75*m:0, total=x.amount+dmg;
+      const sub=(conf[i]?"Paid and confirmed":paid[i]?"Marked paid · waiting on confirmation":"Due "+fmtDate(x.due))+(last?` · ${money(x.amount)} share + ${money(dmg)} refundable damage deposit`:"");
+      list.append(el("div",{class:"inst"+(paid[i]?" done":"")},[cb,el("label",{for:id},[document.createTextNode(last?x.label+" (final)":x.label),el("span",{class:"when",text:sub})]),el("span",{class:"amt",text:money(total)}),(!paid[i]&&!conf[i])?payBtn(PL[insKeys[i]],total):null])); });
     if(m===2&&Object.values(PL).some(Boolean)) list.append(el("p",{class:"note",text:"Paying for two? Set the quantity to 2 at checkout."}));
     const slot=$("#pay-btn-slot"); slot.replaceChildren(); const anyPL=Object.values(PL).some(Boolean);
     slot.append(anyPL?el("p",{class:"note",style:"color:inherit;opacity:.85",text:"Tap Pay next to any payment below. After paying, you'll come right back here to check it off."}):config.stripeUrl?el("a",{class:"btn block",href:config.stripeUrl,target:"_blank",rel:"noopener",text:"Pay with Stripe"}):el("p",{class:"note",style:"color:inherit;opacity:.8",text:"Payment link coming soon."})); }
