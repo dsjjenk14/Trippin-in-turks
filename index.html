@@ -1015,6 +1015,9 @@ input[type=password]{width:100%;font:inherit;min-height:48px;color:var(--ink);bo
 .ao-pay{margin:-2px 0 6px 44px;display:inline-flex;width:auto}
 .ao-paid{margin:-2px 0 6px 44px;color:var(--mint-ink)}
 .visit-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}.visit-grid b{display:block;font-family:var(--display);font-weight:400;font-size:30px;line-height:1.1}.visit-grid small{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.music-tip{position:fixed;z-index:7;right:calc(max(14px, env(safe-area-inset-right, 0px)) + 58px);bottom:calc(84px + env(safe-area-inset-bottom, 0px));background:var(--paper);color:var(--ink);border:1px solid var(--gold-soft);padding:8px 12px;font-size:12px;letter-spacing:.04em;white-space:nowrap;box-shadow:0 10px 24px -14px rgba(10,21,41,.5);opacity:0;transform:translateX(8px);pointer-events:none;transition:opacity .5s ease,transform .5s ease}
+.music-tip.show{opacity:1;transform:none}
+@media (prefers-reduced-motion: no-preference){.music-fab.pulse{animation:fabpulse 1.6s ease-out 3}@keyframes fabpulse{0%{box-shadow:0 0 0 0 rgba(201,169,110,.65),0 10px 24px -12px rgba(10,21,41,.6)}100%{box-shadow:0 0 0 18px rgba(201,169,110,0),0 10px 24px -12px rgba(10,21,41,.6)}}}
 /* iPhones zoom in on inputs under 16px and stay zoomed */
 input,select,textarea{font-size:16px!important}
 </style>
@@ -1515,6 +1518,7 @@ input,select,textarea{font-size:16px!important}
     <button class="btn block" type="button" id="cel-go">Let's go</button>
   </div>
 </div>
+<span class="music-tip" id="music-tip" aria-hidden="true">Play the trip playlist 🎶</span>
 <button class="music-fab" id="music-fab" type="button" aria-expanded="false" aria-controls="player" aria-label="Open the Trippin in Turks playlist"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></button>
 <div class="player spotify" id="player" role="region" aria-label="Trippin in Turks playlist">
   <iframe title="Trippin in Turks playlist on Spotify" data-src="https://open.spotify.com/embed/playlist/7elpRYYVRiIn0NVI3mCd6n?utm_source=generator" width="100%" height="80" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
@@ -2043,7 +2047,7 @@ input,select,textarea{font-size:16px!important}
     const sms=el("a",{class:"btn",href:"sms:"+ph+"?&body="+encodeURIComponent(msg),text:"Text it to "+nm.split(" ")[0]});
     box.append(el("b",{text:nm+" still needs to sign"}),el("p",{class:"note",text:"Plus ones sign the terms themselves. Send them this link so they can read and sign on their own phone."}),el("p",{class:"ps-link",text:link}),el("div",{class:"ps-btns"},[sms,copy]),st); }
   (async()=>{ let tok=""; try{ tok=new URLSearchParams(location.search).get("sign")||""; }catch(_){} if(!tok) return;
-    const ov=$("#ps"); ov.hidden=false; document.body.style.overflow="hidden"; const mf=$("#music-fab"); if(mf) mf.hidden=true;
+    const ov=$("#ps"); ov.hidden=false; document.body.style.overflow="hidden"; const mf=$("#music-fab"); if(mf) mf.hidden=true; const mt=$("#music-tip"); if(mt) mt.hidden=true;
     const terms=$("#terms")?.cloneNode(true); if(terms){ terms.removeAttribute("id"); terms.querySelectorAll("[id]").forEach(n=>n.removeAttribute("id")); terms.querySelectorAll("button,input,a.btn").forEach(n=>n.remove()); $("#ps-terms").append(...terms.childNodes); }
     let sb=null; for(let i=0;i<40&&!sb;i++){ sb=window.__sb||null; if(!sb) await new Promise(r=>setTimeout(r,150)); }
     const intro=$("#ps-intro"); if(!sb){ intro.textContent="Couldn't connect. Refresh to try again."; $("#ps-form-wrap").hidden=true; return; }
@@ -2116,6 +2120,11 @@ input,select,textarea{font-size:16px!important}
 
 
 <script>
+(function(){ const fab=document.getElementById("music-fab"), tip=document.getElementById("music-tip"); if(!fab||!tip) return;
+  let seen=false; try{ seen=sessionStorage.getItem("tt_tip")==="1"; }catch(_){}
+  const hide=()=>{ tip.classList.remove("show"); fab.classList.remove("pulse"); };
+  if(!seen){ setTimeout(()=>{ if(fab.hidden||fab.getAttribute("aria-expanded")==="true") return; tip.classList.add("show"); fab.classList.add("pulse"); try{ sessionStorage.setItem("tt_tip","1"); }catch(_){} setTimeout(hide,6000); },1800); }
+  fab.addEventListener("click",hide); })();
 (function(){ const fab=document.getElementById("music-fab"), pl=document.getElementById("player"), fr=pl&&pl.querySelector("iframe"); if(!fab||!pl) return;
   fab.addEventListener("click",()=>{ const open=!pl.classList.contains("open"); if(open&&fr&&!fr.src) fr.src=fr.dataset.src; pl.classList.toggle("open",open); fab.setAttribute("aria-expanded",String(open)); fab.setAttribute("aria-label",open?"Hide the playlist":"Open the Trippin in Turks playlist"); });
   addEventListener("keydown",e=>{ if(e.key==="Escape"&&pl.classList.contains("open")) fab.click(); });
