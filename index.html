@@ -31,6 +31,9 @@ window.TT_CONFIG = {
   // Trip code from the invite link (?code=...), remembered for after sign-in
   let tripCode = "";
   try { const q = new URLSearchParams(location.search).get("code"); if (q) { tripCode = q.trim(); localStorage.setItem("tt_code", tripCode); } else { tripCode = localStorage.getItem("tt_code") || ""; } } catch (_) {}
+  // Remember a sign-in link error (expired or already used) so we can show it
+  let authErr = "";
+  try { const h = new URLSearchParams((location.hash || "").replace(/^#/, "")); authErr = h.get("error_description") || ""; } catch (_) {}
   const ready = (async () => {
     if (!window.supabase || !C.SUPABASE_URL || C.SUPABASE_URL.includes("YOUR-PROJECT")) return null;
     const sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
@@ -166,6 +169,7 @@ window.TT_CONFIG = {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.textContent = "Enter a valid email."; return; }
       const { error } = await st.sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname + (tripCode ? "?code=" + encodeURIComponent(tripCode) : "") } });
       msg.textContent = error ? "That didn't send. Try again in a minute." : "Check your email for your sign-in link. You can close this tab."; });
+    if (authErr && !realUser) { location.hash = "rsvp"; setMode("email"); $("#signin-msg").textContent = "That sign-in link didn't work (" + authErr.replace(/\+/g, " ") + "). Send yourself a new one below and tap the newest email."; }
     window.TT_SHOW_CODE_FORM = () => { setMode("code"); $("#lock-toggle").hidden = true; };
     if (st.session && window.TT_NOT_INVITED) window.TT_SHOW_CODE_FORM();
     // Host: invites
