@@ -122,16 +122,34 @@ window.TT_CONFIG = {
     const st = await ready; const $ = s => document.querySelector(s);
     const btn = $("#auth-btn");
     if (!st) { const m = $("#signin-msg"); if (m) m.textContent = "The site isn't connected to its database yet. Add your Supabase keys to config.js."; return; }
-    const showEmail = on => { const box = $("#rsvp-locked"); if (!box) return; box.hidden = false;
-      $("#code-form").hidden = on; $("#signin-form").hidden = !on;
-      $("#lock-title").textContent = on ? "Sign in with email" : "Enter your trip code";
-      $("#signin-msg").textContent = on ? "For Dominique, or if you saved your email on another phone. We'll send you a one-tap link." : "It's in the text Dominique sent you. Enter it once and you're in.";
-      $("#lock-toggle").textContent = on ? "Have a trip code? Enter it instead" : "On a new phone? Sign in with email";
-      $("#lock-toggle").hidden = false; };
-    const tg = $("#lock-toggle"); if (tg) tg.addEventListener("click", () => showEmail($("#signin-form").hidden));
+    const MODES = {
+      code: ["Enter your trip code", "It's in the text Dominique sent you. Enter it once and you're in."],
+      rejoin: ["Get back in", "On a new phone? Enter the email you RSVP'd with and the trip code."],
+      email: ["Host sign-in", "Enter your email and we'll send you a one-tap sign-in link."] };
+    let mode = "code";
+    const setMode = m => { const box = $("#rsvp-locked"); if (!box) return; mode = m; box.hidden = false;
+      $("#code-form").hidden = m !== "code"; $("#rejoin-form").hidden = m !== "rejoin"; $("#signin-form").hidden = m !== "email";
+      $("#lock-title").textContent = MODES[m][0]; $("#signin-msg").textContent = MODES[m][1];
+      $("#lock-toggle").hidden = false; $("#lock-toggle").textContent = m === "code" ? "Already RSVP'd on another phone? Get back in" : "First time here? Enter your trip code";
+      $("#host-toggle").hidden = m === "email"; };
+    const showEmail = on => setMode(on ? "email" : "code");
+    const tg = $("#lock-toggle"); if (tg) tg.addEventListener("click", () => setMode(mode === "code" ? "rejoin" : "code"));
+    const ht = $("#host-toggle"); if (ht) ht.addEventListener("click", () => setMode("email"));
     const realUser = st.session && !st.session.user.is_anonymous;
-    if (btn) { btn.hidden = false; btn.textContent = realUser ? "Sign out" : "Sign in";
-      btn.addEventListener("click", async () => { if (realUser) { await st.sb.auth.signOut(); location.reload(); } else { location.hash = "rsvp"; showEmail(true); setTimeout(() => $("#signin-email") && $("#signin-email").focus(), 200); } }); }
+    if (btn) { btn.hidden = !!(st.session && st.session.user.is_anonymous); btn.textContent = realUser ? "Sign out" : "Sign in";
+      btn.addEventListener("click", async () => { if (realUser) { await st.sb.auth.signOut(); location.reload(); } else { location.hash = "rsvp"; setMode("code"); setTimeout(() => $("#code-input") && $("#code-input").focus(), 200); } }); }
+    const rf = $("#rejoin-form");
+    if (rf) rf.addEventListener("submit", async e => { e.preventDefault(); const em = $("#rejoin-email").value.trim(), code = $("#rejoin-code").value.trim(), msg = $("#signin-msg");
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { msg.textContent = "Enter the email you RSVP'd with."; return; }
+      if (!code) { msg.textContent = "Enter the trip code from Dominique's text."; return; }
+      const b = rf.querySelector("button"); b.disabled = true; msg.textContent = "Finding your RSVP…";
+      try { let made = false; if (!st.session) { const a = await st.sb.auth.signInAnonymously(); if (a.error) throw a.error; made = true; }
+        const { data, error } = await st.sb.rpc("rejoin_trip", { code, guest_email: em }); if (error) throw error;
+        if (data === "restored" || data === "not_found") { try { localStorage.setItem("tt_code", code); } catch (_) {} if (data === "not_found") { try { sessionStorage.setItem("tt_flash", "We couldn't find an RSVP with that email, so you're starting fresh. Text Dominique if that's not right."); } catch (_) {} } location.reload(); return; }
+        if (made && data === "bad_code") await st.sb.auth.signOut();
+        msg.textContent = data === "conflict" ? "This phone already has its own RSVP. Text Dominique and she'll sort it out." : "That code didn't work. Check Dominique's text and try again."; }
+      catch (_) { msg.textContent = "Couldn't connect. Try again in a minute."; }
+      b.disabled = false; });
     const cf = $("#code-form");
     if (cf) cf.addEventListener("submit", async e => { e.preventDefault(); const code = $("#code-input").value.trim(); const msg = $("#signin-msg"); if (!code) { msg.textContent = "Enter the trip code from Dominique's text."; return; }
       const b = cf.querySelector("button"); b.disabled = true; msg.textContent = "Checking…";
@@ -142,14 +160,13 @@ window.TT_CONFIG = {
         msg.textContent = "That code didn't work. Check Dominique's text and try again."; }
       catch (_) { msg.textContent = "Couldn't connect. Try again in a minute."; }
       b.disabled = false; });
-    // Saves their email to the account so they can get back in on another phone
-    window.TT_LINK_EMAIL = async email => { if (!window.TT_ANON || !email) return; try { await st.sb.auth.updateUser({ email }); } catch (_) {} };
+    try { const fl = sessionStorage.getItem("tt_flash"); if (fl) { sessionStorage.removeItem("tt_flash"); const s = $("#rsvp-status"); if (s) { s.className = "status err"; s.textContent = fl; } } } catch (_) {}
     const f = $("#signin-form");
     if (f) f.addEventListener("submit", async e => { e.preventDefault(); const email = $("#signin-email").value.trim(); const msg = $("#signin-msg");
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.textContent = "Enter a valid email."; return; }
       const { error } = await st.sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname + (tripCode ? "?code=" + encodeURIComponent(tripCode) : "") } });
       msg.textContent = error ? "That didn't send. Try again in a minute." : "Check your email for your sign-in link. You can close this tab."; });
-    window.TT_SHOW_CODE_FORM = () => { showEmail(false); $("#lock-toggle").hidden = true; };
+    window.TT_SHOW_CODE_FORM = () => { setMode("code"); $("#lock-toggle").hidden = true; };
     if (st.session && window.TT_NOT_INVITED) window.TT_SHOW_CODE_FORM();
     // Host: invites
     const inv = $("#invite-form"); if (!inv || !st.session) return;
@@ -924,30 +941,30 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
 .cel-label{font-family:var(--body);font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold-ink)}
 .cel-card h2{font-family:var(--display);font-weight:400;font-size:38px;line-height:1.05;margin:10px 0 10px;text-wrap:balance}
 .cel-card p{font-size:14px;line-height:1.6;color:var(--muted);margin:0 0 18px}
-.cel-route{display:flex;align-items:center;gap:10px;justify-content:center;font-family:"DM Mono",ui-monospace,monospace;font-size:13px;letter-spacing:.12em;margin:4px 0 18px}
-.cel-route b{font-weight:500;font-size:22px;letter-spacing:.06em}
-.cel-path{position:relative;flex:1;max-width:130px;height:24px}
-.cel-path::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:1px dashed var(--gold)}
-.cel-plane{position:absolute;top:50%;left:0;transform:translate(-50%,-50%);color:var(--navy);font-size:16px;line-height:1}
-.cel-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:18px;font-family:"DM Mono",ui-monospace,monospace}
-.cel-meta small{display:block;font-size:9px;letter-spacing:.2em;color:var(--muted)}
-.cel-meta span{font-size:12px;letter-spacing:.08em}
-.cel-stamp{position:relative;display:inline-block;margin:0 0 14px;border:2px solid var(--mint-ink);color:var(--mint-ink);font-family:"DM Mono",ui-monospace,monospace;font-size:12px;letter-spacing:.18em;padding:6px 10px;transform:rotate(-12deg);background:color-mix(in srgb,var(--paper) 70%,transparent);opacity:.92}
+.cel-post{position:relative;margin:2px -4px 18px;border:1px solid var(--line);overflow:hidden}
+.cel-art{display:block;width:100%;height:120px}
+.cel-greet{position:absolute;left:14px;top:8px;text-align:left;font-family:"Great Vibes",cursive;font-size:30px;line-height:1;color:var(--navy);text-shadow:0 1px 0 var(--paper)}
+.cel-greet small{display:block;font-size:19px;margin-bottom:2px}
+.cel-mark{position:absolute;right:8px;bottom:8px;display:grid;place-items:center;width:88px;height:88px;border-radius:50%;border:2px solid var(--mint-ink);color:var(--mint-ink);font-family:"DM Mono",ui-monospace,monospace;font-size:8.5px;letter-spacing:.05em;line-height:1.4;text-align:center;padding:0 8px;transform:rotate(-14deg);background:color-mix(in srgb,var(--paper) 55%,transparent);box-shadow:inset 0 0 0 4px color-mix(in srgb,var(--paper) 55%,transparent),inset 0 0 0 5px var(--mint-ink)}
+.cel-mark small{display:block;font-size:7.5px;letter-spacing:.04em}
 .cel-conf{position:absolute;inset:0;pointer-events:none}
 .cel-conf i{position:absolute;top:-20px;width:8px;height:12px;border-radius:2px;opacity:0}
 @media (prefers-reduced-motion: no-preference){
   .cel.show{animation:celfade .3s ease both}
   .cel.show .cel-card{animation:celpop .65s cubic-bezier(.2,1.3,.4,1) both}
-  .cel.show .cel-plane{animation:celfly 2.2s ease-in-out .5s both}
-  .cel.show .cel-stamp{animation:celstamp .45s cubic-bezier(.3,1.6,.5,1) 1.3s both}
+  .cel.show .cel-sun{animation:celsun 1.4s ease-out .3s both}
+  .cel.show .cel-waves{animation:celwave 3.2s ease-in-out infinite alternate}
+  .cel.show .cel-greet{animation:celfade .8s ease .6s both}
+  .cel.show .cel-mark{animation:celstamp .45s cubic-bezier(.3,1.6,.5,1) 1.2s both}
   .cel.show .cel-conf i{animation:celfall var(--d,3s) ease-in var(--w,0s) both}
   @keyframes celfade{from{opacity:0}}
   @keyframes celpop{from{opacity:0;transform:translateY(40px) scale(.9)}}
-  @keyframes celfly{from{left:0}to{left:100%}}
-  @keyframes celstamp{from{opacity:0;transform:rotate(-12deg) scale(2.4)}}
+  @keyframes celsun{from{transform:translateY(40px)}}
+  @keyframes celwave{to{transform:translateX(-40px)}}
+  @keyframes celstamp{from{opacity:0;transform:rotate(-14deg) scale(2.4)}}
   @keyframes celfall{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:.9;transform:translate(var(--x,0),110vh) rotate(var(--r,540deg))}}
 }
-@media (prefers-reduced-motion: reduce){.cel-plane{left:100%}}
+.rejoin{display:grid;gap:10px}
 </style>
 
 </head>
@@ -1137,9 +1154,19 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
   <div class="cel-card">
     <span class="cel-label" id="cel-label">Deposit received</span>
     <h2 id="cel-h">You're booked!</h2>
-    <div class="cel-route" aria-hidden="true"><b>DC</b><span class="cel-path"><span class="cel-plane">✈</span></span><b>PLS</b></div>
-    <div class="cel-meta" aria-hidden="true"><div><small>DEPARTS</small><span>MAY 19</span></div><div><small>GATE</small><span>GRACE BAY</span></div><div><small>SEAT</small><span>VILLA</span></div></div>
-    <span class="cel-stamp" id="cel-stamp" aria-hidden="true">CONFIRMED</span>
+    <div class="cel-post" aria-hidden="true">
+      <svg class="cel-art" viewBox="0 0 300 120" preserveAspectRatio="xMidYMid slice">
+        <rect width="300" height="120" fill="var(--sky)"/>
+        <circle class="cel-sun" cx="168" cy="80" r="30" fill="var(--blush)"/>
+        <g class="cel-waves">
+          <path d="M-40 82 q20 -8 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 V120 H-40Z" fill="var(--mint)"/>
+          <path d="M-40 94 q20 -8 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 V120 H-40Z" fill="var(--mint-soft)" opacity=".9"/>
+        </g>
+        <path d="M0 108 Q150 96 300 108 V120 H0Z" fill="var(--gold-soft)"/>
+      </svg>
+      <span class="cel-greet"><small>Greetings from</small>Grace Bay</span>
+      <span class="cel-mark" id="cel-stamp">CONFIRMED<small>MAY 19 · 2027</small></span>
+    </div>
     <p id="cel-p">Your spot in Grace Bay is officially locked in.</p>
     <button class="btn block" type="button" id="cel-go">Let's go</button>
   </div>
@@ -1151,8 +1178,10 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
         <b id="lock-title">Enter your trip code</b>
         <p class="note" id="signin-msg">It's in the text Dominique sent you. Enter it once and you're in.</p>
         <form id="code-form" class="signin-row" novalidate><input type="text" id="code-input" placeholder="TRIP CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Trip code"><button class="btn" type="submit">Join</button></form>
+        <form id="rejoin-form" class="rejoin" novalidate hidden><input type="email" id="rejoin-email" placeholder="Email you RSVP'd with" autocomplete="email" aria-label="Email you RSVP'd with"><input type="text" id="rejoin-code" placeholder="TRIP CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Trip code"><button class="btn block" type="submit">Get back in</button></form>
         <form id="signin-form" class="signin-row" novalidate hidden><input type="email" id="signin-email" placeholder="you@email.com" autocomplete="email" aria-label="Your email"><button class="btn" type="submit">Send link</button></form>
-        <button type="button" class="link-btn" id="lock-toggle">On a new phone? Sign in with email</button>
+        <button type="button" class="link-btn" id="lock-toggle">Already RSVP'd on another phone? Get back in</button>
+        <button type="button" class="link-btn" id="host-toggle" style="font-size:12px;opacity:.75">Host sign-in</button>
       </div>
       <div class="pbook" id="pbook" aria-hidden="true">
         <div class="pb-page">
@@ -1657,7 +1686,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
     const evs=[guests[meId]?.status==="in"?"Updated RSVP":"RSVP'd yes"]; if(f.termsAcceptedAt) evs.push(`checked the agreement box and signed the terms (version ${TERMS_V})`); if(plus?.signature&&(pad2.isDirty()||!guests[meId]?.plusOne?.signature)) evs.push(`plus one ${plus.name} signed the terms`);
     f.log=logFor(meId,evs.join(", "));
     if(!guests[meId]?.rsvpInAt) f.rsvpInAt=new Date().toISOString();
-    try{ await saveMine(f); try{ window.TT_LINK_EMAIL&&window.TT_LINK_EMAIL(email); }catch(_){} formDirty=false; sigDirty=false; pad2.reset(); setTimeout(()=>updateBook(true),50); const dep=(config?.deposit?.amount||0)*(plus?2:1), due=depositDue({rsvpInAt:guests[meId]?.rsvpInAt||f.rsvpInAt});
+    try{ await saveMine(f); formDirty=false; sigDirty=false; pad2.reset(); setTimeout(()=>updateBook(true),50); const dep=(config?.deposit?.amount||0)*(plus?2:1), due=depositDue({rsvpInAt:guests[meId]?.rsvpInAt||f.rsvpInAt});
       flash("rsvp-status",dep&&!guests[meId]?.depositPaid?`You're in! Your ${money(dep)} deposit is due by ${fmtDate(due)}.`:"You're in. See you in Grace Bay!","ok"); }
     catch(e){ flash("rsvp-status",friendlyErr(e),"err"); } finally{ $("#rsvp-save").disabled=false; } });
   async function castVote(k){ if(!db||!meId) return; try{ await saveMine({vote:k,updatedAt:new Date().toISOString()}); }catch(e){ flash("rsvp-status",friendlyErr(e),"err"); } }
@@ -1913,9 +1942,9 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
     const next=(config.installments||[])[0];
     if(k==="deposit"){ $("#cel-label").textContent="Deposit received"; $("#cel-h").textContent=first?`You're booked, ${first}!`:"You're booked!";
       $("#cel-p").textContent=(two?"You and your plus one are officially locked in for Grace Bay.":"Your spot in Grace Bay is officially locked in.")+(next?` Next up is ${next.label.toLowerCase()} on ${fmtDate(next.due)}, and you'll be added to the group chat when it goes live in December.`:"");
-      $("#cel-stamp").textContent="CONFIRMED"; $("#cel-go").textContent="Let's go"; }
+      $("#cel-stamp").firstChild.textContent="CONFIRMED"; $("#cel-go").textContent="Let's go"; }
     else { $("#cel-label").textContent="Paid in full"; $("#cel-h").textContent="All paid up!";
-      $("#cel-p").textContent="That's everything. All that's left is packing your peach and brown and counting down the days. Your damage deposit comes back by June 8."; $("#cel-stamp").textContent="PAID IN FULL"; $("#cel-go").textContent="Can't wait"; }
+      $("#cel-p").textContent="That's everything. All that's left is packing your peach and brown and counting down the days. Your damage deposit comes back by June 8."; $("#cel-stamp").firstChild.textContent="PAID IN FULL"; $("#cel-go").textContent="Can't wait"; }
     const conf=$("#cel-conf"); conf.replaceChildren(); const cols=["var(--mint)","var(--blush)","var(--gold)","var(--gold-soft)","var(--sky)"];
     for(let i=0;i<42;i++){ const c=document.createElement("i"); c.style.left=Math.random()*100+"%"; c.style.background=cols[i%cols.length];
       c.style.setProperty("--d",(2.4+Math.random()*1.8).toFixed(2)+"s"); c.style.setProperty("--w",(Math.random()*.9).toFixed(2)+"s");
