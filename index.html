@@ -1051,7 +1051,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
             </ul></details>
           <details class="gtk-item"><summary><span><b>Group vibes</b><small>Money, photos, keeping it fun</small></span></summary>
             <ul>
-              <li><b>Settle up fast.</b> Pay your share of dinners and drinks within 24 hours of the request.</li>
+              <li><b>Settle up fast.</b> Pay your share of dinners and drinks within 1 hour of the request.</li>
               <li><b>Ask before posting.</b> Get the okay before sharing someone's photos or stories.</li>
               <li><b>Early birds and night owls</b> are both welcome. Do your thing without waking or rushing anyone.</li>
               <li><b>If something feels off,</b> talk to Dominique privately so it doesn't turn into group drama.</li>
@@ -1657,7 +1657,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
     const out={}; Object.entries(per).forEach(([id,f])=>{ const k=sub?f/sub:0, tax=(+r.tax||0)*k, svc=(+r.service||0)*k, tip=f*(+r.tipPct||0)/100; out[id]={food:f,tax,svc,tip,total:f+tax+svc+tip}; });
     return {sub,per:out,un,grand:sub+(+r.tax||0)+(+r.service||0)+sub*(+r.tipPct||0)/100}; }
   function msgFor(r,t){ const parts=["tax"]; if(+r.service) parts.push("service charge"); if(+r.tipPct) parts.push((+r.tipPct)+"% tip");
-    return `${r.place||"Dinner"}: your share is ${m2(t.total)} (food ${m2(t.food)} + ${parts.join(" + ")}). Apple Pay me when you get a chance!`; }
+    return `${r.place||"Dinner"}: your share is ${m2(t.total)} (food ${m2(t.food)} + ${parts.join(" + ")}). Apple Pay me within the hour, please!`; }
   async function copyText(txt,sid){ try{ await navigator.clipboard.writeText(txt); flash(sid,"Copied. Paste it in Messages with an Apple Cash request.","ok"); }catch(_){ flash(sid,txt,"ok"); } }
   async function updRcpt(rid,f){ try{ await db.doc("receipts/"+rid).update(f); }catch(e){ flash("split-status",friendlyErr(e),"err"); } }
   function toggleAssign(rid,iid,id,on){ const r=receipts[rid]; const a={...(r.assign||{})}; const arr=(a[iid]||[]).filter(x=>x!==id); if(!on) arr.push(id); a[iid]=arr; updRcpt(rid,{assign:a});
@@ -1719,7 +1719,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
       const chips=el("div",{class:"chips"},(r.items||[]).map(it=>{ const c=claimants(rid,r,it.id), on=c.includes(meId);
         return el("button",{type:"button",class:"chip item"+(on?" on":""),"aria-pressed":String(on),onclick:()=>toggleClaim(rid,it.id,on)},[el("span",{text:it.n}),el("small",{text:m2(it.p)+(c.length>1?` · split ${c.length}`:"")})]); }));
       box.append(el("div",{class:"tab"},[el("div",{class:"r-line"},[el("b",{text:r.place||"Receipt"}),el("span",{class:"amt",text:mine?m2(mine.total):"$0.00"})]), chips,
-        el("p",{class:"note",text:paid?"Paid. Thank you!":mine?`Food ${m2(mine.food)} + tax${mine.svc?" + service":""}${mine.tip?" + tip":""}. Apple Pay Dominique when she sends the request.`:"Tap the items you had."})])); }); }
+        el("p",{class:"note",text:paid?"Paid. Thank you!":mine?`Food ${m2(mine.food)} + tax${mine.svc?" + service":""}${mine.tip?" + tip":""}. Apple Pay Dominique within 1 hour of her request.`:"Tap the items you had."})])); }); }
   async function toggleClaim(rid,iid,on){ const g=guests[meId]; const cl=new Set(g?.claims?.[rid]||[]); on?cl.delete(iid):cl.add(iid);
     if(on){ const r=receipts[rid], a=(r.assign||{})[iid]; if(a&&a.includes(meId)&&isOwner) updRcpt(rid,{assign:{...r.assign,[iid]:a.filter(x=>x!==meId)}}); }
     try{ await saveMine({claims:{...(g?.claims||{}),[rid]:[...cl]}}); }catch(e){ flash("pay-status",friendlyErr(e),"err"); } }
