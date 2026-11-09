@@ -982,6 +982,18 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
   @keyframes celfall{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:.9;transform:translate(var(--x,0),110vh) rotate(var(--r,540deg))}}
 }
 .rejoin{display:grid;gap:10px}
+
+/* ===== Plus one signing ===== */
+.ps{position:fixed;inset:0;z-index:180;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:max(24px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px))}
+.ps[hidden]{display:none!important}
+.ps-inner{max-width:560px;margin:0 auto;display:grid;gap:12px}
+.ps h1{font-family:var(--display);font-weight:400;font-size:40px;line-height:1.05;margin:4px 0 0;text-wrap:balance}
+.ps-terms summary{display:none}
+.ps-terms{margin-bottom:10px;max-height:46vh;overflow-y:auto;border:1px solid var(--line);background:var(--paper);padding:14px 16px;font-size:13px;line-height:1.55}
+.ps-terms ul{padding-left:18px;margin:6px 0 12px}.ps-terms .label{display:block;margin-top:10px}
+.plus-sign{display:grid;gap:10px}
+.plus-sign .ps-link{font-family:"DM Mono",ui-monospace,monospace;font-size:12px;word-break:break-all;background:var(--paper);border:1px solid var(--line);padding:8px 10px}
+.plus-sign .ps-btns{display:flex;gap:8px;flex-wrap:wrap}
 </style>
 
 </head>
@@ -1112,7 +1124,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
           <details class="gtk-item"><summary><span><b>How do I RSVP and pay?</b></span></summary><p>Open the link Dominique sent and sign in. Tap RSVP and add your name. Then go to the Pay screen and tap Pay with Stripe for your $200 deposit within 7 days. Come back to the Pay screen for each payment, tap Pay with Stripe, and check it off. Dominique confirms each one on her end. Once your deposit is in, you're added to the group chat when it goes live in December.</p></details>
           <details class="gtk-item"><summary><span><b>What does my share cover?</b></span></summary><p>The villa, the private boat to Noah's Ark, car service for every ride, the grocery fund, the clear kayak tour and the chef brunch. The full list is on the Pay screen. Flights, dinners out and optional add-ons are on you.</p></details>
           <details class="gtk-item"><summary><span><b>Do I have to share a room?</b></span></summary><p>It depends on the villa that wins. Rooms are assigned once it's booked, and requests go first come, first served by deposit. Add yours in your RSVP notes.</p></details>
-          <details class="gtk-item"><summary><span><b>Can I bring a plus one?</b></span></summary><p>Yes, as long as they're 21 or older. There are two ways. Your plus one can open the same link, RSVP as themselves and pay their own share. Or check the plus one box on your RSVP to pay for both of you, which doubles your deposit and payments. Either way, Dominique confirms there's space.</p></details>
+          <details class="gtk-item"><summary><span><b>Can I bring a plus one?</b></span></summary><p>Yes, as long as they're 21 or older. There are two ways. Your plus one can open the same link, RSVP as themselves and pay their own share. Or check the plus one box on your RSVP to pay for both of you, which doubles your deposit and payments. You'll get a link to text them so they can sign the terms themselves. Either way, Dominique confirms there's space.</p></details>
           <details class="gtk-item"><summary><span><b>When is everything due?</b></span></summary><p>A $200 deposit within 7 days of your RSVP, then four payments on the 9th of January, February, March and April. Just be all paid up by April 9. A $75 refundable damage deposit is due with that last payment. It comes back by June 8, 2027, minus any damage, extra cleaning or other charges from the trip. If you need more time on a payment, talk to Dominique early.</p></details>
           <details class="gtk-item"><summary><span><b>Why is the share an estimate?</b></span></summary><p>The price depends on whether we end up at 6 or 8. It's locked on December 31, before the first payment, so nobody gets surprise charges later.</p></details>
           <details class="gtk-item"><summary><span><b>What if I'm on a different flight?</b></span></summary><p>No problem. Everyone gets picked up Wednesday and dropped off Monday, whatever time your flight is. Just add your flight times on your RSVP so rides can be grouped. If you come in on a different day or stay past Monday, your airport ride for that leg is on you.</p></details>
@@ -1166,31 +1178,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
       </section>
     </section>
 
-    <div class="cel" id="cel" role="dialog" aria-modal="true" aria-labelledby="cel-h" hidden>
-  <div class="cel-conf" id="cel-conf" aria-hidden="true"></div>
-  <div class="cel-card">
-    <span class="cel-label" id="cel-label">Deposit received</span>
-    <svg class="cel-glasses" viewBox="0 0 160 96" aria-hidden="true">
-      <g transform="translate(58 18)" class="gl gl-l"><g class="gl-in"><path d="M-11 0 H11 L8 36 Q0 46 -8 36 Z" fill="var(--paper)" stroke="var(--gold-ink)" stroke-width="1.5"/><path d="M-9.6 16 H9.6 L8 36 Q0 46 -8 36 Z" fill="var(--gold)" opacity=".55"/><path d="M0 44 V72 M-11 72 H11" stroke="var(--gold-ink)" stroke-width="1.5" stroke-linecap="round" fill="none"/></g></g>
-      <g transform="translate(102 18)" class="gl gl-r"><g class="gl-in"><path d="M-11 0 H11 L8 36 Q0 46 -8 36 Z" fill="var(--paper)" stroke="var(--gold-ink)" stroke-width="1.5"/><path d="M-9.6 16 H9.6 L8 36 Q0 46 -8 36 Z" fill="var(--gold)" opacity=".55"/><path d="M0 44 V72 M-11 72 H11" stroke="var(--gold-ink)" stroke-width="1.5" stroke-linecap="round" fill="none"/></g></g>
-      <g class="cel-spark" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round"><path d="M80 4 V-2 M71 8 L67 4 M89 8 L93 4"/></g>
-      <g class="cel-bub" fill="var(--gold-soft)"><circle cx="76" cy="20" r="2"/><circle cx="83" cy="22" r="1.6"/><circle cx="80" cy="18" r="1.2"/><circle cx="72" cy="24" r="1.4"/><circle cx="87" cy="19" r="1.8"/></g>
-    </svg>
-    <h2 id="cel-h">Cheers, you're in!</h2>
-    <div class="cel-tag" aria-hidden="true">
-      <span class="cel-hole"></span>
-      <div class="cel-tag-body">
-        <small>PASSENGER</small>
-        <b id="cel-name">YOU</b>
-        <span class="cel-tag-row">PLS · GRACE BAY</span><span class="cel-tag-row">MAY 19 TO 24, 2027</span>
-      </div>
-      <span class="cel-stamp2" id="cel-stamp">CONFIRMED</span>
-    </div>
-    <p id="cel-p">Your spot in Grace Bay is officially locked in.</p>
-    <button class="btn block" type="button" id="cel-go">Let's go</button>
-  </div>
-</div>
-    <!-- RSVP -->
+        <!-- RSVP -->
     <section class="screen" data-view="rsvp" hidden>
       <div class="head"><span class="label">RSVP by Dec 30</span><h1>Are you in?</h1><p>A $200 deposit is due within 7 days of your RSVP.</p></div>
       <div id="rsvp-locked" class="notice signin" hidden>
@@ -1246,12 +1234,9 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
           <input type="text" id="plus-legal" maxlength="80" placeholder="Their full name on their passport" aria-label="Plus one's full name on their passport">
           <input type="text" id="plus-phone" maxlength="40" placeholder="Their cell number" inputmode="tel" aria-label="Plus one's cell number">
           <label class="fl" for="plus-tshirt">Plus one's T-shirt size</label><select id="plus-tshirt" class="sel"><option value="">Choose a size</option><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>2XL</option><option>3XL</option></select>
-          <p class="note">Check this to pay for both of you, and your deposit and payments double. Or skip it and have your plus one RSVP and pay on their own from the same link. Dominique will confirm space.</p>
-          <label class="toggle" for="plus-agree"><input type="checkbox" id="plus-agree"><span>Plus one: I've read and agree to the <a href="#pay" class="terms-link2">Terms and Conditions, Release of Liability and Damage Policy</a>, and I'm 21 or older.</span></label>
-          <div class="sig-row"><label class="fl" for="sigpad2">Plus one's signature</label><button type="button" class="link-btn" id="sig2-clear">Clear</button></div>
-          <canvas id="sigpad2" class="sigpad" tabindex="0" aria-label="Plus one's signature pad. They draw their signature with a finger or mouse."></canvas>
-          <p class="note" id="sig2-note">Hand them your phone to sign here, or have them RSVP on their own from the link instead.</p>
+          <p class="note">Check this to pay for both of you, and your deposit and payments double. Your plus one signs the terms themselves: after you RSVP, you'll get a link to text them. Or skip this and have them RSVP and pay on their own from the invite link. Dominique will confirm space.</p>
         </div>
+        <div id="plus-sign" class="notice plus-sign" hidden></div>
         <div class="field"><label class="fl" for="notes">Anything Dominique should know?</label><textarea id="notes" maxlength="400" placeholder="Room preference or anything else"></textarea></div>
         <button class="btn block" type="submit" id="rsvp-save">RSVP</button>
         <div class="agree">
@@ -1372,7 +1357,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
           <li>You're responsible for your own health, medications, allergies and drinking. Travel insurance with medical coverage is required for everyone, including plus ones, and must be bought by April 9, 2027. Anyone without it may not be able to join the trip, and refunds still follow the schedule above.</li>
           <li>You follow the villa's house rules, local laws, and the instructions of captains, guides and drivers, and you agree to each vendor's own terms and waivers.</li>
           <li>If your conduct puts anyone at risk or breaks house rules, you may be asked to leave the villa or an activity, with no refund.</li>
-          <li>Every plus one must agree to these terms and sign, either on your RSVP or by RSVPing on their own. If you RSVP for a plus one, you're also responsible for their conduct, payments and any damage they cause.</li>
+          <li>Every plus one must agree to these terms and sign for themselves, either with the signing link from your RSVP or by RSVPing on their own. If you RSVP for a plus one, you're also responsible for their conduct, payments and any damage they cause.</li>
         </ul>
         <span class="label tl">5. Assumption of risk and release</span>
         <ul>
@@ -1450,6 +1435,53 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
   </main>
 </div>
 
+<div class="ps" id="ps" role="dialog" aria-modal="true" aria-labelledby="ps-h" hidden>
+  <div class="ps-inner">
+    <span class="label">Trippin in Turks · Grace Bay · May 19 to 24, 2027</span>
+    <h1 id="ps-h">Sign as a plus one</h1>
+    <p id="ps-intro">Loading…</p>
+    <div id="ps-form-wrap">
+      <span class="label" style="margin-top:6px">Terms and Conditions, Release of Liability and Damage Policy</span>
+      <div class="ps-terms" id="ps-terms" tabindex="0" aria-label="Terms and Conditions"></div>
+      <form id="ps-form" class="list" novalidate>
+        <div class="field"><label class="fl" for="ps-legal">Full name on your passport</label><input type="text" id="ps-legal" maxlength="80" autocomplete="name"></div>
+        <div class="field"><label class="fl" for="ps-email">Your email</label><input type="email" id="ps-email" maxlength="120" autocomplete="email" inputmode="email" placeholder="you@email.com"></div>
+        <label class="toggle" for="ps-agree"><input type="checkbox" id="ps-agree"><span>I've read and agree to the Terms and Conditions, Release of Liability and Damage Policy, and I'm 21 or older.</span></label>
+        <div class="field">
+          <div class="sig-row"><label class="fl" for="ps-pad">Your signature</label><button type="button" class="link-btn" id="ps-clear">Clear</button></div>
+          <canvas id="ps-pad" class="sigpad" tabindex="0" aria-label="Signature pad. Draw your signature with your finger or mouse."></canvas>
+          <p class="note" id="ps-note">Sign with your finger or mouse.</p>
+        </div>
+        <button class="btn block" type="submit" id="ps-save">Sign</button>
+        <p class="status" id="ps-status" role="status"></p>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="cel" id="cel" role="dialog" aria-modal="true" aria-labelledby="cel-h" hidden>
+  <div class="cel-conf" id="cel-conf" aria-hidden="true"></div>
+  <div class="cel-card">
+    <span class="cel-label" id="cel-label">Deposit received</span>
+    <svg class="cel-glasses" viewBox="0 0 160 96" aria-hidden="true">
+      <g transform="translate(58 18)" class="gl gl-l"><g class="gl-in"><path d="M-11 0 H11 L8 36 Q0 46 -8 36 Z" fill="var(--paper)" stroke="var(--gold-ink)" stroke-width="1.5"/><path d="M-9.6 16 H9.6 L8 36 Q0 46 -8 36 Z" fill="var(--gold)" opacity=".55"/><path d="M0 44 V72 M-11 72 H11" stroke="var(--gold-ink)" stroke-width="1.5" stroke-linecap="round" fill="none"/></g></g>
+      <g transform="translate(102 18)" class="gl gl-r"><g class="gl-in"><path d="M-11 0 H11 L8 36 Q0 46 -8 36 Z" fill="var(--paper)" stroke="var(--gold-ink)" stroke-width="1.5"/><path d="M-9.6 16 H9.6 L8 36 Q0 46 -8 36 Z" fill="var(--gold)" opacity=".55"/><path d="M0 44 V72 M-11 72 H11" stroke="var(--gold-ink)" stroke-width="1.5" stroke-linecap="round" fill="none"/></g></g>
+      <g class="cel-spark" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round"><path d="M80 4 V-2 M71 8 L67 4 M89 8 L93 4"/></g>
+      <g class="cel-bub" fill="var(--gold-soft)"><circle cx="76" cy="20" r="2"/><circle cx="83" cy="22" r="1.6"/><circle cx="80" cy="18" r="1.2"/><circle cx="72" cy="24" r="1.4"/><circle cx="87" cy="19" r="1.8"/></g>
+    </svg>
+    <h2 id="cel-h">Cheers, you're in!</h2>
+    <div class="cel-tag" aria-hidden="true">
+      <span class="cel-hole"></span>
+      <div class="cel-tag-body">
+        <small>PASSENGER</small>
+        <b id="cel-name">YOU</b>
+        <span class="cel-tag-row">PLS · GRACE BAY</span><span class="cel-tag-row">MAY 19 TO 24, 2027</span>
+      </div>
+      <span class="cel-stamp2" id="cel-stamp">CONFIRMED</span>
+    </div>
+    <p id="cel-p">Your spot in Grace Bay is officially locked in.</p>
+    <button class="btn block" type="button" id="cel-go">Let's go</button>
+  </div>
+</div>
 <button class="music-fab" id="music-fab" type="button" aria-expanded="false" aria-controls="player" aria-label="Open the Trippin in Turks playlist"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></button>
 <div class="player spotify" id="player" role="region" aria-label="Trippin in Turks playlist">
   <iframe title="Trippin in Turks playlist on Spotify" data-src="https://open.spotify.com/embed/playlist/7elpRYYVRiIn0NVI3mCd6n?utm_source=generator" width="100%" height="80" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
@@ -1620,7 +1652,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
   $("#sheet-go").addEventListener("click",()=>{ if(sheetFor&&sheetFor.day in DAYMAP){ activeDay=DAYMAP[sheetFor.day]; renderDays(); } closeSheet(); setTimeout(()=>$("#days").scrollIntoView({behavior:still?"auto":"smooth",block:"start"}),60); });
 
   // Terms agreement + signature pad
-  const TERMS_V="2026-11b"; let sigDirty=false, sigCtx=null, sigDrawing=false, sigLast=null;
+  const TERMS_V="2026-11c"; let sigDirty=false, sigCtx=null, sigDrawing=false, sigLast=null;
   function sigSetup(){ const c=$("#sigpad"); const r=c.getBoundingClientRect(); if(!r.width) return; const dpr=Math.min(2,devicePixelRatio||1);
     c.width=Math.round(r.width*dpr); c.height=Math.round(r.height*dpr); sigCtx=c.getContext("2d"); sigCtx.setTransform(dpr,0,0,dpr,0,0);
     sigCtx.lineWidth=2.2; sigCtx.lineCap="round"; sigCtx.lineJoin="round"; sigCtx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue("--ink").trim()||"#2A2824";
@@ -1645,8 +1677,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
     $("#"+clid).addEventListener("click",()=>{ setup(); if(ctx) ctx.clearRect(0,0,c.width,c.height); dirty=false; $("#"+nid).textContent=idleMsg; });
     return { isDirty:()=>dirty, reset:()=>{ dirty=false; }, refresh:()=>{ if(!dirty) requestAnimationFrame(setup); },
       data:()=>{ const out=document.createElement("canvas"); out.width=360; out.height=Math.round(360*c.height/c.width)||100; out.getContext("2d").drawImage(c,0,0,out.width,out.height); return out.toDataURL("image/png"); } }; }
-  const pad2=makePad("sigpad2","sig2-note","sig2-clear",()=>guests[meId]?.plusOne?.signature,"Hand them your phone to sign here, or have them RSVP on their own from the link instead.");
-  $("#plus").addEventListener("change",()=>{ if($("#plus").checked) pad2.refresh(); });
+  const psPad=makePad("ps-pad","ps-note","ps-clear",()=>null,"Sign with your finger or mouse.");
 
   // RSVP
   ["nick","email","notes","plus-name","tshirt","plus-tshirt"].forEach(id=>$("#"+id).addEventListener("input",()=>{formDirty=true;}));
@@ -1673,7 +1704,8 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
     if(g?.status==="in") slot.append(el("span",{class:"stamp",text:"✓ YOU'RE IN"+(g.plusOne?" +1":"")}));
     else if(g?.status==="out") slot.append(el("span",{class:"stamp out",text:"CAN'T MAKE IT"}));
     updateBook(false);
-    if(formDirty||!g) return; $("#agree").checked=!!g.termsAcceptedAt; if(g.signature){ $("#sig-note").textContent="Signed. Tap Clear to redo it."; requestAnimationFrame(sigSetup); } $("#nick").value=g.nickname||""; $("#email").value=g.email||""; $("#tshirt").value=g.tshirt||""; $("#plus-tshirt").value=g.plusOne?.tshirt||""; updateBook(false); $("#notes").value=g.notes||""; ["phone","legal","diet"].forEach(k=>$("#"+k).value=g[k]||""); $("#ec-name").value=g.emergency?.name||""; $("#ec-phone").value=g.emergency?.phone||""; $("#fl-arr").value=g.flights?.arrive||""; $("#fl-dep").value=g.flights?.depart||""; $("#plus-legal").value=g.plusOne?.legal||""; $("#plus-phone").value=g.plusOne?.phone||""; $("#plus").checked=!!g.plusOne; $("#plus-name").value=g.plusOne?.name||""; $("#plus-fields").hidden=!g.plusOne; $("#plus-agree").checked=!!g.plusOne?.termsAcceptedAt; if(g.plusOne?.signature){ $("#sig2-note").textContent="Signed. Tap Clear to redo it."; pad2.refresh(); } }
+    renderPlusSign(g);
+    if(formDirty||!g) return; $("#agree").checked=!!g.termsAcceptedAt; if(g.signature){ $("#sig-note").textContent="Signed. Tap Clear to redo it."; requestAnimationFrame(sigSetup); } $("#nick").value=g.nickname||""; $("#email").value=g.email||""; $("#tshirt").value=g.tshirt||""; $("#plus-tshirt").value=g.plusOne?.tshirt||""; updateBook(false); $("#notes").value=g.notes||""; ["phone","legal","diet"].forEach(k=>$("#"+k).value=g[k]||""); $("#ec-name").value=g.emergency?.name||""; $("#ec-phone").value=g.emergency?.phone||""; $("#fl-arr").value=g.flights?.arrive||""; $("#fl-dep").value=g.flights?.depart||""; $("#plus-legal").value=g.plusOne?.legal||""; $("#plus-phone").value=g.plusOne?.phone||""; $("#plus").checked=!!g.plusOne; $("#plus-name").value=g.plusOne?.name||""; $("#plus-fields").hidden=!g.plusOne; }
   function logFor(id,e){ return [...(guests[id]?.log||[]),{t:new Date().toISOString(),e}].slice(-300); }
   function termsText(){ return [...document.querySelectorAll("#terms .refund div, #terms .tl, #terms li")].map(n=>n.textContent.replace(/\s+/g," ").trim()).filter(Boolean).join("\n"); }
   async function saveMine(f){ const ref=db.doc("guests/"+meId); if(guests[meId]) await ref.update(f); else await ref.set(f); }
@@ -1695,17 +1727,15 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
     if(plus&&plus.phone.replace(/\D/g,"").length<10) return flash("rsvp-status","Add your plus one's cell number.","err");
     if(plus&&!plus.tshirt) return flash("rsvp-status","Pick your plus one's T-shirt size.","err");
     const signedBefore=!!guests[meId]?.termsAcceptedAt;
-    if(plus){ const prev=guests[meId]?.plusOne; if(!$("#plus-agree").checked) return flash("rsvp-status","Your plus one needs to check the box agreeing to the terms.","err");
-      if(!pad2.isDirty()&&!prev?.signature) return flash("rsvp-status","Have your plus one sign, or uncheck the box and have them RSVP on their own.","err");
-      plus.signature=pad2.isDirty()?pad2.data():prev.signature; plus.termsAcceptedAt=pad2.isDirty()?new Date().toISOString():(prev.termsAcceptedAt||new Date().toISOString()); plus.termsVersion=TERMS_V; }
+    if(plus){ const prev=guests[meId]?.plusOne; plus.token=prev?.token||((crypto.randomUUID?crypto.randomUUID():String(Math.random()).slice(2)+Date.now()).replace(/-/g,"")); }
     if(!$("#agree").checked) return flash("rsvp-status","Check the box to agree to the terms and waiver.","err");
     if(!sigDirty&&!signedBefore) return flash("rsvp-status","Add your signature to finish your RSVP.","err");
     $("#rsvp-save").disabled=true; const f={nickname:nick,email,phone,legal,emergency,diet,flights,tshirt,status:"in",plusOne:plus,notes:$("#notes").value.trim(),updatedAt:new Date().toISOString()};
     if(sigDirty){ f.signature=sigData(); f.termsAcceptedAt=new Date().toISOString(); f.termsVersion=TERMS_V; f.termsSnapshot=termsText(); } else if(!signedBefore){ f.termsAcceptedAt=new Date().toISOString(); f.termsVersion=TERMS_V; f.termsSnapshot=termsText(); }
-    const evs=[guests[meId]?.status==="in"?"Updated RSVP":"RSVP'd yes"]; if(f.termsAcceptedAt) evs.push(`checked the agreement box and signed the terms (version ${TERMS_V})`); if(plus?.signature&&(pad2.isDirty()||!guests[meId]?.plusOne?.signature)) evs.push(`plus one ${plus.name} signed the terms`);
+    const evs=[guests[meId]?.status==="in"?"Updated RSVP":"RSVP'd yes"]; if(f.termsAcceptedAt) evs.push(`checked the agreement box and signed the terms (version ${TERMS_V})`); if(plus&&!guests[meId]?.plusOne) evs.push(`added plus one ${plus.name}`);
     f.log=logFor(meId,evs.join(", "));
     if(!guests[meId]?.rsvpInAt) f.rsvpInAt=new Date().toISOString();
-    try{ await saveMine(f); formDirty=false; sigDirty=false; pad2.reset(); setTimeout(()=>updateBook(true),50); const dep=(config?.deposit?.amount||0)*(plus?2:1), due=depositDue({rsvpInAt:guests[meId]?.rsvpInAt||f.rsvpInAt});
+    try{ await saveMine(f); formDirty=false; sigDirty=false; setTimeout(()=>updateBook(true),50); const dep=(config?.deposit?.amount||0)*(plus?2:1), due=depositDue({rsvpInAt:guests[meId]?.rsvpInAt||f.rsvpInAt});
       flash("rsvp-status",dep&&!guests[meId]?.depositPaid?`You're in! Your ${money(dep)} deposit is due by ${fmtDate(due)}.`:"You're in. See you in Grace Bay!","ok"); }
     catch(e){ flash("rsvp-status",friendlyErr(e),"err"); } finally{ $("#rsvp-save").disabled=false; } });
   async function castVote(k){ if(!db||!meId) return; try{ await saveMine({vote:k,updatedAt:new Date().toISOString()}); }catch(e){ flash("rsvp-status",friendlyErr(e),"err"); } }
@@ -1775,7 +1805,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
       if(config?.deposit?.amount){ const due=depositDue(g),c=!!g.depositConfirmed,p=!!g.depositPaid,late=due&&!p&&!c&&Date.now()>due.getTime();
         cell.append(el("button",{type:"button",class:"mini"+(c?" on":""),style:late?"border-color:var(--err);color:var(--err)":null,text:(c?"✓ ":p?"$ ":late?"! ":"")+"Dep",title:c?"Deposit confirmed":p?"Marked paid":due?(late?"Overdue since ":"Due ")+fmtDate(due):"Not RSVP'd yet",onclick:()=>toggleDeposit(id)})," "); }
       for(let i=0;i<n;i++){ const p=!!(g.paid||[])[i],c=!!(g.confirmed||[])[i]; cell.append(el("button",{type:"button",class:"mini"+(c?" on":""),text:(c?"✓ ":p?"$ ":"")+"#"+(i+1),onclick:()=>toggleConfirm(id,i)})," "); }
-      body.append(el("tr",{},[el("td",{text:nameFor(id)+(g.tshirt?" ("+g.tshirt+")":"")+(g.plusOne&&g.status==="in"?" +1 "+(g.plusOne.name||"")+(g.plusOne.tshirt?" ("+g.plusOne.tshirt+")":""):"")}),el("td",{text:({in:"Going",maybe:"Maybe",out:"Can't"}[g.status]||"No answer")+(g.termsAcceptedAt?" · signed":"")+(g.insured?" · insured":"")+(g.plusOne&&g.status==="in"?(g.plusOne.termsAcceptedAt?" · +1 signed":" · +1 not signed"):"")}),el("td",{text:VILLAS.find(v=>v.key===g.vote)?.name||"None"}),cell,el("td",{text:(g.optIns||[]).map(k=>OPTS.find(o=>o.key===k)?.short).filter(Boolean).join(", ")||"None"}),el("td",{},[el("button",{type:"button",class:"mini",text:"Record PDF",onclick:()=>evidencePdf(id)})," ",el("button",{type:"button",class:"mini"+(g.remindersOff?" on":""),text:g.remindersOff?"Reminders off":"Reminders on",title:g.email||"No email yet",onclick:()=>db.doc("guests/"+id).update({remindersOff:!g.remindersOff,log:logFor(id,g.remindersOff?"Dominique turned email reminders back on":"Dominique turned off email reminders")}).catch(e=>flash("stripe-status",friendlyErr(e),"err"))})," ",document.createTextNode(g.notes||""),el("div",{class:"note",style:"margin-top:4px",text:[g.phone&&"Cell "+g.phone,g.legal&&"Passport name "+g.legal,g.emergency?.name&&"Emergency "+g.emergency.name+" "+(g.emergency.phone||""),g.diet&&"Diet "+g.diet,g.flights?.arrive&&"In "+g.flights.arrive,g.flights?.depart&&"Out "+g.flights.depart,g.insurance?.company&&"Insurance "+g.insurance.company+" #"+(g.insurance.policy||""),g.plusOne&&g.status==="in"&&g.plusOne.phone&&"+1 cell "+g.plusOne.phone].filter(Boolean).join(" · ")})])])); }); }
+      body.append(el("tr",{},[el("td",{text:nameFor(id)+(g.tshirt?" ("+g.tshirt+")":"")+(g.plusOne&&g.status==="in"?" +1 "+(g.plusOne.name||"")+(g.plusOne.tshirt?" ("+g.plusOne.tshirt+")":""):"")}),el("td",{text:({in:"Going",maybe:"Maybe",out:"Can't"}[g.status]||"No answer")+(g.termsAcceptedAt?" · signed":"")+(g.insured?" · insured":"")+(g.plusOne&&g.status==="in"?(g.plusOneSigned?.termsAcceptedAt?" · +1 signed":" · +1 not signed"):"")}),el("td",{text:VILLAS.find(v=>v.key===g.vote)?.name||"None"}),cell,el("td",{text:(g.optIns||[]).map(k=>OPTS.find(o=>o.key===k)?.short).filter(Boolean).join(", ")||"None"}),el("td",{},[el("button",{type:"button",class:"mini",text:"Record PDF",onclick:()=>evidencePdf(id)})," ",el("button",{type:"button",class:"mini"+(g.remindersOff?" on":""),text:g.remindersOff?"Reminders off":"Reminders on",title:g.email||"No email yet",onclick:()=>db.doc("guests/"+id).update({remindersOff:!g.remindersOff,log:logFor(id,g.remindersOff?"Dominique turned email reminders back on":"Dominique turned off email reminders")}).catch(e=>flash("stripe-status",friendlyErr(e),"err"))})," ",document.createTextNode(g.notes||""),el("div",{class:"note",style:"margin-top:4px",text:[g.phone&&"Cell "+g.phone,g.legal&&"Passport name "+g.legal,g.emergency?.name&&"Emergency "+g.emergency.name+" "+(g.emergency.phone||""),g.diet&&"Diet "+g.diet,g.flights?.arrive&&"In "+g.flights.arrive,g.flights?.depart&&"Out "+g.flights.depart,g.insurance?.company&&"Insurance "+g.insurance.company+" #"+(g.insurance.policy||""),g.plusOne&&g.status==="in"&&g.plusOne.phone&&"+1 cell "+g.plusOne.phone].filter(Boolean).join(" · ")})])])); }); }
   async function toggleConfirm(id,i){ const n=config?.installments?.length||4, c=Array.isArray(guests[id].confirmed)?guests[id].confirmed.slice():[]; while(c.length<n) c.push(false); c[i]=!c[i];
     try{ await db.doc("guests/"+id).update({confirmed:c,log:logFor(id,(c[i]?"Dominique confirmed payment ":"Dominique unconfirmed payment ")+(i+1)+" received")}); }catch(e){ flash("stripe-status",friendlyErr(e),"err"); } }
   async function toggleDeposit(id){ try{ await db.doc("guests/"+id).update({depositConfirmed:!guests[id].depositConfirmed,log:logFor(id,!guests[id].depositConfirmed?"Dominique confirmed deposit received":"Dominique unconfirmed deposit")}); }catch(e){ flash("stripe-status",friendlyErr(e),"err"); } }
@@ -1903,7 +1933,8 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
     head("Terms agreement");
     if(g.termsAcceptedAt){ txt(`Checked "I've read and agree to the terms, waiver and damage policy" and signed on ${fmtFull(g.termsAcceptedAt)} (terms version ${g.termsVersion||TERMS_V}). Electronic signature:`); img(g.signature); }
     else txt("No signed agreement on file.");
-    if(g.plusOne?.termsAcceptedAt){ txt(`Plus one ${g.plusOne.name} confirmed they agree to the terms and are 21 or older, and signed on ${fmtFull(g.plusOne.termsAcceptedAt)}:`); img(g.plusOne.signature); }
+    const ps=g.plusOneSigned; if(ps?.termsAcceptedAt){ txt(`Plus one ${ps.legal||g.plusOne?.name||""} (${ps.email||"no email"}) opened their own signing link, checked "I've read and agree to the terms, waiver and damage policy, and I'm 21 or older," and signed on ${fmtFull(ps.termsAcceptedAt)} (terms version ${ps.termsVersion||TERMS_V}). Electronic signature:`); img(ps.signature); }
+    else if(g.plusOne&&g.status==="in") txt(`Plus one ${g.plusOne.name||""}: has not signed the terms yet.`);
     head("Travel insurance"); txt(g.insured?`Confirmed they bought travel insurance with medical coverage on ${fmtFull(g.insuredAt)}.`:"Not confirmed.");
     head("Payment schedule and status");
     txt(`Share: ${money((config?.share||0)*m)}${m===2?" (two people)":""}. Refundable damage deposit: ${money(75*m)}, due with the April 9 payment.`);
@@ -1945,6 +1976,44 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
         el("button",{type:"button",class:"mini",text:"Copy",onclick:()=>copyText(t,"remind-status")})])); });
     if(!all.length) box.append(el("p",{class:"note",text:"Nobody owes anything right now."}));
     $("#remind-all").hidden=!all.length; $("#remind-all").onclick=()=>copyText(all.join("\n\n"),"remind-status"); }
+
+  // Plus one signs for themselves with their own link
+  function plusLink(tok){ return location.origin+"/?sign="+encodeURIComponent(tok); }
+  function renderPlusSign(g){ const box=$("#plus-sign"); if(!box) return; box.replaceChildren();
+    if(!g||g.status!=="in"||!g.plusOne||!g.plusOne.token){ box.hidden=true; return; } box.hidden=false;
+    const nm=g.plusOne.name||"Your plus one", signed=g.plusOneSigned?.termsAcceptedAt;
+    if(signed){ box.append(el("b",{text:"✓ "+nm+" signed the terms"}),el("p",{class:"note",text:"Signed "+fmtDate(signed)+". You're all set."})); return; }
+    const link=plusLink(g.plusOne.token), first=(g.nickname||"").split(" ")[0]||"Your friend";
+    const msg=`Hey! I added you as my plus one for Trippin in Turks 🌴 Before we go, you need to sign the trip terms yourself. It takes 2 minutes: ${link}`;
+    const st=el("p",{class:"status"});
+    const copy=el("button",{type:"button",class:"btn ghost",text:"Copy link",onclick:async()=>{ try{ await navigator.clipboard.writeText(msg); st.className="status ok"; st.textContent="Copied. Paste it in a text to "+nm+"."; }catch(_){ st.className="status"; st.textContent=msg; } }});
+    const ph=String(g.plusOne.phone||"").replace(/[^\d+]/g,"");
+    const sms=el("a",{class:"btn",href:"sms:"+ph+"?&body="+encodeURIComponent(msg),text:"Text it to "+nm.split(" ")[0]});
+    box.append(el("b",{text:nm+" still needs to sign"}),el("p",{class:"note",text:"Plus ones sign the terms themselves. Send them this link so they can read and sign on their own phone."}),el("p",{class:"ps-link",text:link}),el("div",{class:"ps-btns"},[sms,copy]),st); }
+  (async()=>{ let tok=""; try{ tok=new URLSearchParams(location.search).get("sign")||""; }catch(_){} if(!tok) return;
+    const ov=$("#ps"); ov.hidden=false; document.body.style.overflow="hidden"; const mf=$("#music-fab"); if(mf) mf.hidden=true;
+    const terms=$("#terms")?.cloneNode(true); if(terms){ terms.removeAttribute("id"); terms.querySelectorAll("[id]").forEach(n=>n.removeAttribute("id")); terms.querySelectorAll("button,input,a.btn").forEach(n=>n.remove()); $("#ps-terms").append(...terms.childNodes); }
+    let sb=null; for(let i=0;i<40&&!sb;i++){ sb=window.__sb||null; if(!sb) await new Promise(r=>setTimeout(r,150)); }
+    const intro=$("#ps-intro"); if(!sb){ intro.textContent="Couldn't connect. Refresh to try again."; $("#ps-form-wrap").hidden=true; return; }
+    const { data, error }=await sb.rpc("get_plus_one",{ token:tok });
+    if(error||!data){ intro.textContent="This signing link isn't valid anymore. Ask the friend who invited you to send a new one."; $("#ps-form-wrap").hidden=true; return; }
+    const host=data.host||"Your friend";
+    if(data.signed){ $("#ps-h").textContent="You're all signed"; intro.textContent=`You already signed the terms as ${host}'s plus one. See you in Grace Bay!`; $("#ps-form-wrap").hidden=true; return; }
+    $("#ps-h").textContent=`Hi${data.name?" "+data.name.split(" ")[0]:""}!`;
+    intro.textContent=`${host} added you as their plus one for Trippin in Turks in Grace Bay, May 19 to 24, 2027. Every guest signs the trip terms for themselves, so read them below, then sign.`;
+    if(data.legal) $("#ps-legal").value=data.legal;
+    requestAnimationFrame(()=>psPad.refresh());
+    $("#ps-form").addEventListener("submit",async e=>{ e.preventDefault(); const st="ps-status";
+      const legal=$("#ps-legal").value.trim(), email=$("#ps-email").value.trim();
+      if(!legal) return flash(st,"Add your full name as it reads on your passport.","err");
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return flash(st,"Add a valid email.","err");
+      if(!$("#ps-agree").checked) return flash(st,"Check the box to agree to the terms.","err");
+      if(!psPad.isDirty()) return flash(st,"Add your signature.","err");
+      $("#ps-save").disabled=true; flash(st,"Saving…","ok");
+      try{ const r=await sb.rpc("sign_plus_one",{ token:tok, legal, email, signature:psPad.data(), terms_version:TERMS_V, terms_snapshot:termsText() });
+        if(r.error||!r.data) throw r.error||new Error("no");
+        $("#ps-h").textContent="You're signed!"; intro.textContent=`Thanks, ${legal.split(" ")[0]}. ${host} will see that you signed. See you in Grace Bay! 🌴`; $("#ps-form-wrap").hidden=true; scrollTo(0,0); ov.scrollTop=0; }
+      catch(_){ flash(st,"That didn't save. Check your connection and try again.","err"); $("#ps-save").disabled=false; } }); })();
 
   // Celebration when the deposit (and later, the last payment) goes through
   const celShown={};
