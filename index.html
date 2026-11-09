@@ -28,6 +28,9 @@ window.TT_CONFIG = {
 // It provides the small window.claude.use(...) interface the app already expects.
 (function () {
   const C = window.TT_CONFIG || {};
+  // Trip code from the invite link (?code=...), remembered for after sign-in
+  let tripCode = "";
+  try { const q = new URLSearchParams(location.search).get("code"); if (q) { tripCode = q.trim(); localStorage.setItem("tt_code", tripCode); } else { tripCode = localStorage.getItem("tt_code") || ""; } } catch (_) {}
   const ready = (async () => {
     if (!window.supabase || !C.SUPABASE_URL || C.SUPABASE_URL.includes("YOUR-PROJECT")) return null;
     const sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
@@ -38,6 +41,7 @@ window.TT_CONFIG = {
     window.TT_EMAIL = session.user.email || "";
     let invited = false;
     try { const r = await sb.rpc("is_invited"); invited = !!r.data; } catch (_) {}
+    if (!invited && tripCode) { try { const j = await sb.rpc("join_trip", { code: tripCode }); invited = !!j.data; } catch (_) {} }
     window.TT_NOT_INVITED = !invited;
     return { sb, session, invited };
   })();
@@ -116,8 +120,18 @@ window.TT_CONFIG = {
     const f = $("#signin-form");
     if (f) f.addEventListener("submit", async e => { e.preventDefault(); const email = $("#signin-email").value.trim(); const msg = $("#signin-msg");
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.textContent = "Enter a valid email."; return; }
-      const { error } = await st.sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname } });
+      const { error } = await st.sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname + (tripCode ? "?code=" + encodeURIComponent(tripCode) : "") } });
       msg.textContent = error ? "That didn't send. Try again in a minute." : "Check your email for your sign-in link. You can close this tab."; });
+    window.TT_SHOW_CODE_FORM = () => {
+      const box = $("#rsvp-locked"); if (!box) return; box.hidden = false;
+      box.querySelector("b").textContent = "Enter your trip code";
+      $("#signin-msg").textContent = "It's in the text Dominique sent you, like TURKS-ABCDE.";
+      const form = $("#signin-form"); form.hidden = false; const inp = $("#signin-email"); inp.type = "text"; inp.value = ""; inp.placeholder = "TURKS-XXXXX"; inp.setAttribute("aria-label", "Trip code"); inp.autocomplete = "off";
+      form.querySelector("button").textContent = "Join";
+      form.onsubmit = async (e) => { e.preventDefault(); e.stopImmediatePropagation(); const code = inp.value.trim(); if (!code) return;
+        const { data } = await st.sb.rpc("join_trip", { code }); if (data) { try { localStorage.setItem("tt_code", code); } catch (_) {} location.reload(); } else { $("#signin-msg").textContent = "That code didn't work. Check Dominique's text and try again."; } };
+    };
+    if (st.session && window.TT_NOT_INVITED) window.TT_SHOW_CODE_FORM();
     // Host: invites
     const inv = $("#invite-form"); if (!inv || !st.session) return;
     const list = $("#invite-list"), status = $("#invite-status");
@@ -125,6 +139,14 @@ window.TT_CONFIG = {
     inv.addEventListener("submit", async e => { e.preventDefault(); const email = $("#invite-email").value.trim().toLowerCase(); if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { status.textContent = "Enter a valid email."; return; }
       const { error } = await st.sb.from("invites").upsert({ email }); status.textContent = error ? "Couldn't add that email." : "Added. Send them the site link."; $("#invite-email").value = ""; refresh(); });
     refresh();
+    // Host: the invite link with the trip code
+    try { const { data: code } = await st.sb.rpc("get_invite_code"); if (code) { const link = location.origin + "/?code=" + encodeURIComponent(code);
+      const wrap = document.createElement("div"); wrap.className = "invite-link";
+      const t = document.createElement("p"); t.className = "note"; t.innerHTML = "<b>Your invite link</b> · text this to friends. They sign in with their own email and join automatically. Trip code: <b></b>"; t.querySelectorAll("b")[1].textContent = code;
+      const l = document.createElement("p"); l.className = "invite-url"; l.textContent = link;
+      const b = document.createElement("button"); b.type = "button"; b.className = "btn ghost"; b.textContent = "Copy invite link";
+      b.onclick = async () => { try { await navigator.clipboard.writeText(link); status.textContent = "Invite link copied."; } catch (_) { status.textContent = link; } };
+      wrap.append(t, l, b); document.querySelector("#invite-card .note").after(wrap); } } catch (_) {}
   });
 })();
 
@@ -872,6 +894,8 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
 .player.spotify.open{opacity:1;pointer-events:auto;transform:none!important}
 .app{padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px))!important}
 @media (prefers-reduced-motion: reduce){.player.spotify{transition:none}}
+.invite-link{display:grid;gap:8px;padding:12px 0;border-bottom:1px solid var(--line)}
+.invite-url{margin:0;font-family:var(--mono);font-size:13px;word-break:break-all;background:var(--paper);padding:10px 12px}
 </style>
 
 </head>
@@ -1077,7 +1101,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
           <input type="text" id="plus-name" maxlength="40" placeholder="Their name" aria-label="Plus one's name">
           <label class="fl" for="plus-tshirt">Plus one's T-shirt size</label><select id="plus-tshirt" class="sel"><option value="">Choose a size</option><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>2XL</option><option>3XL</option></select>
           <p class="note">Check this to pay for both of you, and your deposit and payments double. Or skip it and have your plus one RSVP and pay on their own from the same link. Dominique will confirm space.</p>
-          <label class="toggle" for="plus-agree"><input type="checkbox" id="plus-agree"><span>My plus one has read and agrees to the terms, waiver and damage policy, and is 21 or older.</span></label>
+          <label class="toggle" for="plus-agree"><input type="checkbox" id="plus-agree"><span>Plus one: I've read and agree to the <a href="#pay" class="terms-link2">Terms and Conditions, Release of Liability and Damage Policy</a>, and I'm 21 or older.</span></label>
           <div class="sig-row"><label class="fl" for="sigpad2">Plus one's signature</label><button type="button" class="link-btn" id="sig2-clear">Clear</button></div>
           <canvas id="sigpad2" class="sigpad" tabindex="0" aria-label="Plus one's signature pad. They draw their signature with a finger or mouse."></canvas>
           <p class="note" id="sig2-note">Hand them your phone to sign here, or have them RSVP on their own from the link instead.</p>
@@ -1085,7 +1109,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
         <div class="field"><label class="fl" for="notes">Anything Dominique should know?</label><textarea id="notes" maxlength="400" placeholder="Room preference, dietary needs, arriving late"></textarea></div>
         <button class="btn block" type="submit" id="rsvp-save">RSVP</button>
         <div class="agree">
-          <label class="toggle" for="agree"><input type="checkbox" id="agree"><span>I've read and agree to the <a href="#pay" id="terms-link">terms, waiver and damage policy</a>.</span></label>
+          <label class="toggle" for="agree"><input type="checkbox" id="agree"><span>I've read and agree to the <a href="#pay" id="terms-link">Terms and Conditions, Release of Liability and Damage Policy</a>, and I'm 21 or older.</span></label>
           <div class="field">
             <div class="sig-row"><label class="fl" for="sigpad">Your signature</label><button type="button" class="link-btn" id="sig-clear">Clear</button></div>
             <canvas id="sigpad" class="sigpad" tabindex="0" aria-label="Signature pad. Draw your signature with your finger or mouse."></canvas>
@@ -1243,7 +1267,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
       </form>
       <div class="card list" id="invite-card">
         <span class="label">Guest list access</span>
-        <p class="note">Only emails on this list can sign in and see the trip. Add each friend and plus one here, then send them the site link.</p>
+        <p class="note">Friends join with your invite link below, no emails needed. You can also add someone by email here.</p>
         <form id="invite-form" class="signin-row" novalidate><input type="email" id="invite-email" placeholder="friend@email.com" aria-label="Friend's email"><button class="btn" type="submit">Add</button></form>
         <div class="list" id="invite-list"></div>
         <p class="status" id="invite-status" role="status"></p>
@@ -1513,7 +1537,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
     const plus=$("#plus").checked?{name:$("#plus-name").value.trim(),tshirt:$("#plus-tshirt").value}:null; if(plus&&!plus.name) return flash("rsvp-status","Add your plus one's name, or uncheck the box.","err");
     if(plus&&!plus.tshirt) return flash("rsvp-status","Pick your plus one's T-shirt size.","err");
     const signedBefore=!!guests[meId]?.termsAcceptedAt;
-    if(plus){ const prev=guests[meId]?.plusOne; if(!$("#plus-agree").checked) return flash("rsvp-status","Check the box confirming your plus one agrees to the terms.","err");
+    if(plus){ const prev=guests[meId]?.plusOne; if(!$("#plus-agree").checked) return flash("rsvp-status","Your plus one needs to check the box agreeing to the terms.","err");
       if(!pad2.isDirty()&&!prev?.signature) return flash("rsvp-status","Have your plus one sign, or uncheck the box and have them RSVP on their own.","err");
       plus.signature=pad2.isDirty()?pad2.data():prev.signature; plus.termsAcceptedAt=pad2.isDirty()?new Date().toISOString():(prev.termsAcceptedAt||new Date().toISOString()); plus.termsVersion=TERMS_V; }
     if(!$("#agree").checked) return flash("rsvp-status","Check the box to agree to the terms and waiver.","err");
@@ -1760,7 +1784,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
     if(isOwner){ try{ assets=await window.claude?.use("assets"); }catch(_){ assets=null; } }
     show(); if(window.TT_EMAIL&&!$("#email").value) $("#email").value=window.TT_EMAIL;
     if(!db||!meId){ $("#rsvp-locked").hidden=false; renderAll(); return; }
-    if(window.TT_NOT_INVITED){ const n=$("#rsvp-locked"); n.hidden=false; n.querySelector("form").hidden=true; n.querySelector("b").textContent="You're signed in, but not on the guest list yet"; $("#signin-msg").textContent="Ask Dominique to add "+(window.TT_EMAIL||"your email")+" to the guest list, then refresh."; }
+    if(window.TT_NOT_INVITED&&window.TT_SHOW_CODE_FORM) window.TT_SHOW_CODE_FORM();
     const timer=setTimeout(()=>{ $("#crew-list").prepend(el("p",{class:"note",text:"Still connecting. The list may be out of date."})); },10000);
     db.collection("guests").onSnapshot(snap=>{ const next={}; snap.docs.forEach(d=>{ if(d.exists) next[d.id]=d.data(); }); guests=next; clearTimeout(timer); renderAll(); },
       ()=>{ clearTimeout(timer); $("#crew-list").replaceChildren(el("p",{class:"note",text:"Couldn't load the guest list. Refresh to try again."})); });
