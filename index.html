@@ -1541,10 +1541,10 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
     $("#share-bar").style.width=Math.min(100,share?paidAmt/share*100:0)+"%";
     if(dep){ const due=depositDue(mine), late=due&&!mine.depositPaid&&Date.now()>due.getTime();
       const cb=el("input",{type:"checkbox",id:"paid-dep"}); cb.checked=!!mine.depositPaid; if(!db||!meId) cb.disabled=true; cb.addEventListener("change",()=>markDeposit(cb.checked));
-      const sub=mine.depositConfirmed?"Confirmed by Dominique":mine.depositPaid?"Marked paid · waiting on confirmation":due?(late?`Overdue · was due ${fmtDate(due)}`:`Due ${fmtDate(due)}, 7 days after you RSVP'd`):"Due within 7 days of tapping RSVP";
+      const sub=mine.depositConfirmed?"Paid and confirmed":mine.depositPaid?"Marked paid · waiting on confirmation":due?(late?`Overdue · was due ${fmtDate(due)}`:`Due ${fmtDate(due)}, 7 days after you RSVP'd`):"Due within 7 days of tapping RSVP";
       list.append(el("div",{class:"inst"+(mine.depositPaid?" done":"")+(late?" late":"")},[cb,el("label",{for:"paid-dep"},[document.createTextNode("Deposit"),el("span",{class:"when",text:sub})]),el("span",{class:"amt",text:money(dep)}),(!mine.depositPaid&&!mine.depositConfirmed)?payBtn(PL.dep,dep):null])); }
     ins.forEach((x,i)=>{ const id="paid-"+i, cb=el("input",{type:"checkbox",id}); cb.checked=!!paid[i]; if(!db||!meId) cb.disabled=true; cb.addEventListener("change",()=>markPaid(i,cb.checked));
-      const sub=conf[i]?"Confirmed by Dominique":paid[i]?"Marked paid · waiting on confirmation":"Due "+fmtDate(x.due);
+      const sub=conf[i]?"Paid and confirmed":paid[i]?"Marked paid · waiting on confirmation":"Due "+fmtDate(x.due);
       list.append(el("div",{class:"inst"+(paid[i]?" done":"")},[cb,el("label",{for:id},[document.createTextNode(x.label),el("span",{class:"when",text:sub})]),el("span",{class:"amt",text:money(x.amount)}),(!paid[i]&&!conf[i])?payBtn(PL[insKeys[i]],x.amount+(i===ins.length-1?75*m:0)):null])); });
     if(m===2&&Object.values(PL).some(Boolean)) list.append(el("p",{class:"note",text:"Paying for two? Set the quantity to 2 at checkout."}));
     const slot=$("#pay-btn-slot"); slot.replaceChildren(); const anyPL=Object.values(PL).some(Boolean);
