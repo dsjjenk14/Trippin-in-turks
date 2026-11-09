@@ -36,8 +36,15 @@ window.TT_CONFIG = {
     const sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
     window.__sb = sb;
     const { data } = await sb.auth.getSession();
-    const session = data.session;
+    let session = data.session;
+    // Came from the invite link: get them in with no email step
+    if (!session && tripCode) {
+      try { const a = await sb.auth.signInAnonymously(); session = a.data?.session || null;
+        if (session) { const j = await sb.rpc("join_trip", { code: tripCode }); if (!j.data) { await sb.auth.signOut(); session = null; try { localStorage.removeItem("tt_code"); } catch (_) {} } }
+      } catch (_) { session = null; }
+    }
     if (!session) return { sb, session: null };
+    window.TT_ANON = !!session.user.is_anonymous;
     window.TT_EMAIL = session.user.email || "";
     let invited = false;
     try { const r = await sb.rpc("is_invited"); invited = !!r.data; } catch (_) {}
@@ -115,22 +122,34 @@ window.TT_CONFIG = {
     const st = await ready; const $ = s => document.querySelector(s);
     const btn = $("#auth-btn");
     if (!st) { const m = $("#signin-msg"); if (m) m.textContent = "The site isn't connected to its database yet. Add your Supabase keys to config.js."; return; }
-    if (btn) { btn.hidden = false; btn.textContent = st.session ? "Sign out" : "Sign in";
-      btn.addEventListener("click", async () => { if (st.session) { await st.sb.auth.signOut(); location.reload(); } else { location.hash = "rsvp"; setTimeout(() => $("#signin-email") && $("#signin-email").focus(), 200); } }); }
+    const showEmail = on => { const box = $("#rsvp-locked"); if (!box) return; box.hidden = false;
+      $("#code-form").hidden = on; $("#signin-form").hidden = !on;
+      $("#lock-title").textContent = on ? "Sign in with email" : "Enter your trip code";
+      $("#signin-msg").textContent = on ? "For Dominique, or if you saved your email on another phone. We'll send you a one-tap link." : "It's in the text Dominique sent you. Enter it once and you're in.";
+      $("#lock-toggle").textContent = on ? "Have a trip code? Enter it instead" : "On a new phone? Sign in with email";
+      $("#lock-toggle").hidden = false; };
+    const tg = $("#lock-toggle"); if (tg) tg.addEventListener("click", () => showEmail($("#signin-form").hidden));
+    const realUser = st.session && !st.session.user.is_anonymous;
+    if (btn) { btn.hidden = false; btn.textContent = realUser ? "Sign out" : "Sign in";
+      btn.addEventListener("click", async () => { if (realUser) { await st.sb.auth.signOut(); location.reload(); } else { location.hash = "rsvp"; showEmail(true); setTimeout(() => $("#signin-email") && $("#signin-email").focus(), 200); } }); }
+    const cf = $("#code-form");
+    if (cf) cf.addEventListener("submit", async e => { e.preventDefault(); const code = $("#code-input").value.trim(); const msg = $("#signin-msg"); if (!code) { msg.textContent = "Enter the trip code from Dominique's text."; return; }
+      const b = cf.querySelector("button"); b.disabled = true; msg.textContent = "Checking…";
+      try { let made = false; if (!st.session) { const a = await st.sb.auth.signInAnonymously(); if (a.error) throw a.error; made = true; }
+        const { data } = await st.sb.rpc("join_trip", { code });
+        if (data) { try { localStorage.setItem("tt_code", code); } catch (_) {} location.reload(); return; }
+        if (made) await st.sb.auth.signOut();
+        msg.textContent = "That code didn't work. Check Dominique's text and try again."; }
+      catch (_) { msg.textContent = "Couldn't connect. Try again in a minute."; }
+      b.disabled = false; });
+    // Saves their email to the account so they can get back in on another phone
+    window.TT_LINK_EMAIL = async email => { if (!window.TT_ANON || !email) return; try { await st.sb.auth.updateUser({ email }); } catch (_) {} };
     const f = $("#signin-form");
     if (f) f.addEventListener("submit", async e => { e.preventDefault(); const email = $("#signin-email").value.trim(); const msg = $("#signin-msg");
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.textContent = "Enter a valid email."; return; }
       const { error } = await st.sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname + (tripCode ? "?code=" + encodeURIComponent(tripCode) : "") } });
       msg.textContent = error ? "That didn't send. Try again in a minute." : "Check your email for your sign-in link. You can close this tab."; });
-    window.TT_SHOW_CODE_FORM = () => {
-      const box = $("#rsvp-locked"); if (!box) return; box.hidden = false;
-      box.querySelector("b").textContent = "Enter your trip code";
-      $("#signin-msg").textContent = "It's in the text Dominique sent you, like TRIPPIN2027.";
-      const form = $("#signin-form"); form.hidden = false; const inp = $("#signin-email"); inp.type = "text"; inp.value = ""; inp.placeholder = "TRIP CODE"; inp.setAttribute("aria-label", "Trip code"); inp.autocomplete = "off";
-      form.querySelector("button").textContent = "Join";
-      form.onsubmit = async (e) => { e.preventDefault(); e.stopImmediatePropagation(); const code = inp.value.trim(); if (!code) return;
-        const { data } = await st.sb.rpc("join_trip", { code }); if (data) { try { localStorage.setItem("tt_code", code); } catch (_) {} location.reload(); } else { $("#signin-msg").textContent = "That code didn't work. Check Dominique's text and try again."; } };
-    };
+    window.TT_SHOW_CODE_FORM = () => { showEmail(false); $("#lock-toggle").hidden = true; };
     if (st.session && window.TT_NOT_INVITED) window.TT_SHOW_CODE_FORM();
     // Host: invites
     const inv = $("#invite-form"); if (!inv || !st.session) return;
@@ -142,7 +161,7 @@ window.TT_CONFIG = {
     // Host: the invite link with the trip code
     try { const { data: code } = await st.sb.rpc("get_invite_code"); if (code) { const link = location.origin + "/?code=" + encodeURIComponent(code);
       const wrap = document.createElement("div"); wrap.className = "invite-link";
-      const t = document.createElement("p"); t.className = "note"; t.innerHTML = "<b>Your invite link</b> · text this to friends. They sign in with their own email and join automatically. Trip code: <b></b>"; t.querySelectorAll("b")[1].textContent = code;
+      const t = document.createElement("p"); t.className = "note"; t.innerHTML = "<b>Your invite link</b> · text this to friends. They tap it and they're in. No email or password needed. Trip code: <b></b>"; t.querySelectorAll("b")[1].textContent = code;
       const l = document.createElement("p"); l.className = "invite-url"; l.textContent = link;
       const b = document.createElement("button"); b.type = "button"; b.className = "btn ghost"; b.textContent = "Copy invite link";
       b.onclick = async () => { try { await navigator.clipboard.writeText(link); status.textContent = "Invite link copied."; } catch (_) { status.textContent = link; } };
@@ -1084,9 +1103,11 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
     <section class="screen" data-view="rsvp" hidden>
       <div class="head"><span class="label">RSVP by Dec 30</span><h1>Are you in?</h1><p>A $200 deposit is due within 7 days of your RSVP.</p></div>
       <div id="rsvp-locked" class="notice signin" hidden>
-        <b>Sign in to RSVP, vote and pay</b>
-        <p class="note" id="signin-msg">Enter the email Dominique invited, and we'll send you a one-tap sign-in link.</p>
-        <form id="signin-form" class="signin-row" novalidate><input type="email" id="signin-email" placeholder="you@email.com" autocomplete="email" aria-label="Your email"><button class="btn" type="submit">Send link</button></form>
+        <b id="lock-title">Enter your trip code</b>
+        <p class="note" id="signin-msg">It's in the text Dominique sent you. Enter it once and you're in.</p>
+        <form id="code-form" class="signin-row" novalidate><input type="text" id="code-input" placeholder="TRIP CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Trip code"><button class="btn" type="submit">Join</button></form>
+        <form id="signin-form" class="signin-row" novalidate hidden><input type="email" id="signin-email" placeholder="you@email.com" autocomplete="email" aria-label="Your email"><button class="btn" type="submit">Send link</button></form>
+        <button type="button" class="link-btn" id="lock-toggle">On a new phone? Sign in with email</button>
       </div>
       <div class="pbook" id="pbook" aria-hidden="true">
         <div class="pb-page">
@@ -1591,7 +1612,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
     const evs=[guests[meId]?.status==="in"?"Updated RSVP":"RSVP'd yes"]; if(f.termsAcceptedAt) evs.push(`checked the agreement box and signed the terms (version ${TERMS_V})`); if(plus?.signature&&(pad2.isDirty()||!guests[meId]?.plusOne?.signature)) evs.push(`plus one ${plus.name} signed the terms`);
     f.log=logFor(meId,evs.join(", "));
     if(!guests[meId]?.rsvpInAt) f.rsvpInAt=new Date().toISOString();
-    try{ await saveMine(f); formDirty=false; sigDirty=false; pad2.reset(); setTimeout(()=>updateBook(true),50); const dep=(config?.deposit?.amount||0)*(plus?2:1), due=depositDue({rsvpInAt:guests[meId]?.rsvpInAt||f.rsvpInAt});
+    try{ await saveMine(f); try{ window.TT_LINK_EMAIL&&window.TT_LINK_EMAIL(email); }catch(_){} formDirty=false; sigDirty=false; pad2.reset(); setTimeout(()=>updateBook(true),50); const dep=(config?.deposit?.amount||0)*(plus?2:1), due=depositDue({rsvpInAt:guests[meId]?.rsvpInAt||f.rsvpInAt});
       flash("rsvp-status",dep&&!guests[meId]?.depositPaid?`You're in! Your ${money(dep)} deposit is due by ${fmtDate(due)}.`:"You're in. See you in Grace Bay!","ok"); }
     catch(e){ flash("rsvp-status",friendlyErr(e),"err"); } finally{ $("#rsvp-save").disabled=false; } });
   async function castVote(k){ if(!db||!meId) return; try{ await saveMine({vote:k,updatedAt:new Date().toISOString()}); }catch(e){ flash("rsvp-status",friendlyErr(e),"err"); } }
