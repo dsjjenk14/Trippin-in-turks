@@ -1143,6 +1143,7 @@ input,select,textarea{font-size:16px!important}
           <details class="gtk-item"><summary><span><b>Do I have to share a room?</b></span></summary><p>It depends on the villa that wins. Rooms are assigned once it's booked, and requests go first come, first served by deposit. Add yours in your RSVP notes.</p></details>
           <details class="gtk-item"><summary><span><b>Can I bring a plus one?</b></span></summary><p>Yes, as long as they're 21 or older. There are two ways. Your plus one can open the same link, RSVP as themselves and pay their own share. Or check the plus one box on your RSVP to pay for both of you, which doubles your deposit and payments. You'll get a link to text them so they can sign the terms themselves. Either way, Dominique confirms there's space.</p></details>
           <details class="gtk-item"><summary><span><b>When is everything due?</b></span></summary><p>A $200 deposit within 7 days of your RSVP, then four payments on the 9th of January, February, March and April. Just be all paid up by April 9. A $75 refundable damage deposit is due with that last payment. It comes back by June 8, 2027, minus any damage, extra cleaning or other charges from the trip. If you need more time on a payment, talk to Dominique early.</p></details>
+          <details class="gtk-item"><summary><span><b>What if I need to cancel?</b></span></summary><p>Text Dominique as soon as you know. Cancel by March 15 for a full refund. From March 16 to April 1 you get back your excursions, car service and grocery fund, but not the villa or the Noah's Ark boat. After April 1 there are no refunds. Refunds also depend on each vendor's own policy, so you get back what they refund for your spot. Card fees aren't refundable. Travel insurance can help cover what isn't.</p></details>
           <details class="gtk-item"><summary><span><b>Why is the share an estimate?</b></span></summary><p>The price depends on whether we end up at 6 or 8. It's locked on December 31, before the first payment, so nobody gets surprise charges later.</p></details>
           <details class="gtk-item"><summary><span><b>What if I'm on a different flight?</b></span></summary><p>No problem. Everyone gets picked up Wednesday and dropped off Monday, whatever time your flight is. Just add your flight times on your RSVP so rides can be grouped. If you come in on a different day or stay past Monday, your airport ride for that leg is on you.</p></details>
           <details class="gtk-item"><summary><span><b>Do I have to do everything?</b></span></summary><p>Not at all. Every night out is optional, and the add-ons on the Plan screen are opt-in. Hang at the pool whenever you want.</p></details>
@@ -1343,6 +1344,7 @@ input,select,textarea{font-size:16px!important}
           <div><b>March 16 to April 1</b><span>Your excursions, car service and grocery fund are refunded, except the private boat to Noah's Ark. Your share of the villa is not.</span></div>
           <div><b>After April 1</b><span>No refunds. Bookings are final at that point.</span></div>
         </div>
+        <p class="note">All refunds also depend on each vendor's own refund policy. You get back what the villa host, boat, tours and other vendors refund for your spot, even within the dates above.</p>
         <span class="label tl">1. What this is</span>
         <ul>
           <li>Trippin in Turks is a private trip among friends. Dominique Jenkins ("the organizer") coordinates a shared villa rental and group bookings as a private individual. She is not a travel agency, tour operator or seller of travel.</li>
@@ -1356,6 +1358,7 @@ input,select,textarea{font-size:16px!important}
           <li>Space is limited to what the villa holds. Spots are confirmed in the order deposits are received. Anyone after that goes on a waitlist and pays nothing unless a spot opens.</li>
           <li>Spots can't be given or sold to someone else. Every guest is invited by the organizer.</li>
           <li>To cancel, text Dominique. Your cancellation date is the day she receives your message. Refunds follow the schedule above and go back to the card you paid with. Card processing fees aren't refundable.</li>
+          <li>Refunds also depend on each vendor's own refund policy. The organizer pays for the villa, boats, tours, car service and other bookings in advance, and can only refund your portion of a booking to the extent that vendor refunds it to her. If a vendor won't refund your portion, that amount isn't refundable, even within the dates above. Anything a vendor does refund for your spot is passed back to you.</li>
           <li>No refunds for missed activities, leaving early, arriving late, or being denied boarding or entry.</li>
           <li>A $75 refundable damage deposit per person is due with the April 9 payment.</li>
           <li><b>When it comes back:</b> the villa host has up to 14 days after checkout on May 24 to report damage. Once that window closes, your deposit is refunded to the card you paid with by June 8, 2027. Card refunds can take 5 to 10 business days to show up.</li>
@@ -1669,7 +1672,7 @@ input,select,textarea{font-size:16px!important}
   $("#sheet-go").addEventListener("click",()=>{ if(sheetFor&&sheetFor.day in DAYMAP){ activeDay=DAYMAP[sheetFor.day]; renderDays(); } closeSheet(); setTimeout(()=>$("#days").scrollIntoView({behavior:still?"auto":"smooth",block:"start"}),60); });
 
   // Terms agreement + signature pad
-  const TERMS_V="2026-11c"; let sigDirty=false, sigCtx=null, sigDrawing=false, sigLast=null;
+  const TERMS_V="2026-11d"; let sigDirty=false, sigCtx=null, sigDrawing=false, sigLast=null;
   function sigSetup(){ const c=$("#sigpad"); const r=c.getBoundingClientRect(); if(!r.width) return; const dpr=Math.min(2,devicePixelRatio||1);
     c.width=Math.round(r.width*dpr); c.height=Math.round(r.height*dpr); sigCtx=c.getContext("2d"); sigCtx.setTransform(dpr,0,0,dpr,0,0);
     sigCtx.lineWidth=2.2; sigCtx.lineCap="round"; sigCtx.lineJoin="round"; sigCtx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue("--ink").trim()||"#2A2824";
