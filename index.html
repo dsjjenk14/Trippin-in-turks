@@ -125,8 +125,8 @@ window.TT_CONFIG = {
     window.TT_SHOW_CODE_FORM = () => {
       const box = $("#rsvp-locked"); if (!box) return; box.hidden = false;
       box.querySelector("b").textContent = "Enter your trip code";
-      $("#signin-msg").textContent = "It's in the text Dominique sent you, like TURKS-ABCDE.";
-      const form = $("#signin-form"); form.hidden = false; const inp = $("#signin-email"); inp.type = "text"; inp.value = ""; inp.placeholder = "TURKS-XXXXX"; inp.setAttribute("aria-label", "Trip code"); inp.autocomplete = "off";
+      $("#signin-msg").textContent = "It's in the text Dominique sent you, like TRIPPIN2027.";
+      const form = $("#signin-form"); form.hidden = false; const inp = $("#signin-email"); inp.type = "text"; inp.value = ""; inp.placeholder = "TRIP CODE"; inp.setAttribute("aria-label", "Trip code"); inp.autocomplete = "off";
       form.querySelector("button").textContent = "Join";
       form.onsubmit = async (e) => { e.preventDefault(); e.stopImmediatePropagation(); const code = inp.value.trim(); if (!code) return;
         const { data } = await st.sb.rpc("join_trip", { code }); if (data) { try { localStorage.setItem("tt_code", code); } catch (_) {} location.reload(); } else { $("#signin-msg").textContent = "That code didn't work. Check Dominique's text and try again."; } };
