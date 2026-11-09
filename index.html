@@ -128,13 +128,13 @@ window.TT_CONFIG = {
     const MODES = {
       code: ["Enter your trip code", "It's in the text Dominique sent you. Enter it once and you're in."],
       rejoin: ["Get back in", "On a new phone? Enter the email you RSVP'd with and the trip code."],
-      email: ["Host sign-in", "Enter your email and we'll send you a one-tap sign-in link."] };
+      email: ["Host sign-in", "Sign in with your email and password."] };
     let mode = "code";
     const setMode = m => { const box = $("#rsvp-locked"); if (!box) return; mode = m; box.hidden = false;
       $("#code-form").hidden = m !== "code"; $("#rejoin-form").hidden = m !== "rejoin"; $("#signin-form").hidden = m !== "email";
       $("#lock-title").textContent = MODES[m][0]; $("#signin-msg").textContent = MODES[m][1];
       $("#lock-toggle").hidden = false; $("#lock-toggle").textContent = m === "code" ? "Already RSVP'd on another phone? Get back in" : "First time here? Enter your trip code";
-      $("#host-toggle").hidden = m === "email"; const o = $("#otp-row"); if (o && m !== "email") o.hidden = true; };
+      $("#host-toggle").hidden = m === "email"; };
     const showEmail = on => setMode(on ? "email" : "code");
     const tg = $("#lock-toggle"); if (tg) tg.addEventListener("click", () => setMode(mode === "code" ? "rejoin" : "code"));
     const ht = $("#host-toggle"); if (ht) ht.addEventListener("click", () => setMode("email"));
@@ -168,20 +168,19 @@ window.TT_CONFIG = {
       b.disabled = false; });
     try { const fl = sessionStorage.getItem("tt_flash"); if (fl) { sessionStorage.removeItem("tt_flash"); const s = $("#rsvp-status"); if (s) { s.className = "status err"; s.textContent = fl; } } } catch (_) {}
     const f = $("#signin-form");
-    if (f) f.addEventListener("submit", async e => { e.preventDefault(); const email = $("#signin-email").value.trim(); const msg = $("#signin-msg");
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.textContent = "Enter a valid email."; return; }
-      const { error } = await st.sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname + (tripCode ? "?code=" + encodeURIComponent(tripCode) : "") } });
-      if (error) { msg.textContent = "That didn't send. Wait a minute and try again."; return; }
-      msg.textContent = "Check your email. Type the 6-digit code from it below, or tap the link in the email.";
-      let row = $("#otp-row"); if (!row) { row = document.createElement("form"); row.id = "otp-row"; row.className = "signin-row"; row.noValidate = true;
-        row.innerHTML = '<input type="text" id="otp-code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="6-digit code" aria-label="Sign-in code"><button class="btn" type="submit">Sign in</button>';
-        f.after(row);
-        row.addEventListener("submit", async ev => { ev.preventDefault(); const token = $("#otp-code").value.replace(/\s/g, ""); if (!token) return;
-          const bt = row.querySelector("button"); bt.disabled = true; msg.textContent = "Checking…";
-          const r = await st.sb.auth.verifyOtp({ email: $("#signin-email").value.trim(), token, type: "email" });
-          if (r.error) { bt.disabled = false; msg.textContent = "That code didn't work. Use the newest email, or send a new code."; return; }
-          location.hash = ""; location.reload(); }); }
-      row.hidden = false; setTimeout(() => $("#otp-code") && $("#otp-code").focus(), 100); });
+    if (f) {
+      f.addEventListener("submit", async e => { e.preventDefault(); const email = $("#signin-email").value.trim(), pw = $("#signin-pass").value, msg = $("#signin-msg");
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.textContent = "Enter your email."; return; }
+        if (!pw) { msg.textContent = "Enter your password, or tap \"Email me a sign-in link instead.\""; return; }
+        const b = f.querySelector("button[type=submit]"); b.disabled = true; msg.textContent = "Signing in…";
+        const { error } = await st.sb.auth.signInWithPassword({ email, password: pw });
+        if (error) { b.disabled = false; msg.textContent = "That email and password didn't match. Try again."; return; }
+        location.hash = ""; location.reload(); });
+      $("#send-link").addEventListener("click", async () => { const email = $("#signin-email").value.trim(), msg = $("#signin-msg");
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.textContent = "Enter your email first."; return; }
+        const { error } = await st.sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname } });
+        msg.textContent = error ? "That didn't send. Wait a minute and try again." : "Check your email for the sign-in link. Press and hold it, copy it, and paste it into this browser."; });
+    }
     if (authErr && !realUser) { location.hash = "rsvp"; setMode("email"); $("#signin-msg").textContent = "That sign-in link didn't work (" + authErr.replace(/\+/g, " ") + "). Send yourself a new one below and tap the newest email."; }
     window.TT_SHOW_CODE_FORM = () => { setMode("code"); $("#lock-toggle").hidden = true; };
     if (st.session && window.TT_NOT_INVITED) window.TT_SHOW_CODE_FORM();
@@ -1202,7 +1201,7 @@ input,select,textarea{font-size:16px!important}
         <p class="note" id="signin-msg">It's in the text Dominique sent you. Enter it once and you're in.</p>
         <form id="code-form" class="signin-row" novalidate><input type="text" id="code-input" placeholder="TRIP CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Trip code"><button class="btn" type="submit">Join</button></form>
         <form id="rejoin-form" class="rejoin" novalidate hidden><input type="email" id="rejoin-email" placeholder="Email you RSVP'd with" autocomplete="email" aria-label="Email you RSVP'd with"><input type="text" id="rejoin-code" placeholder="TRIP CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Trip code"><button class="btn block" type="submit">Get back in</button></form>
-        <form id="signin-form" class="signin-row" novalidate hidden><input type="email" id="signin-email" placeholder="you@email.com" autocomplete="email" aria-label="Your email"><button class="btn" type="submit">Send link</button></form>
+        <form id="signin-form" class="rejoin" novalidate hidden><input type="email" id="signin-email" placeholder="info@trippinturks.com" autocomplete="username" aria-label="Your email"><input type="password" id="signin-pass" placeholder="Password" autocomplete="current-password" aria-label="Password"><button class="btn block" type="submit">Sign in</button><button type="button" class="link-btn" id="send-link">Email me a sign-in link instead</button></form>
         <button type="button" class="link-btn" id="lock-toggle">Already RSVP'd on another phone? Get back in</button>
         <button type="button" class="link-btn" id="host-toggle" style="font-size:12px;opacity:.75">Host sign-in</button>
       </div>
