@@ -1009,6 +1009,8 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
 .plus-sign .ps-btns{display:flex;gap:8px;flex-wrap:wrap}
 
 input[type=password]{width:100%;font:inherit;min-height:48px;color:var(--ink);border-radius:0;background:transparent;border:0;border-bottom:1px solid var(--line);padding:12px 0;font-weight:300;outline-offset:2px}
+.ao-pay{margin:-2px 0 6px 44px;display:inline-flex;width:auto}
+.ao-paid{margin:-2px 0 6px 44px;color:var(--mint-ink)}
 /* iPhones zoom in on inputs under 16px and stay zoomed */
 input,select,textarea{font-size:16px!important}
 </style>
@@ -1288,7 +1290,7 @@ input,select,textarea{font-size:16px!important}
       <div class="card" style="padding:8px 16px"><div class="timeline" id="timeline"></div></div>
       <div class="card optins">
         <span class="label" id="opt-label">Optional add-ons · sign up by April 9</span>
-        <p class="note" id="opt-note">Check what you want to join by April 9, 2027 so Dominique can book the right number of spots. These are paid on your own. After April 9 the list closes and spots are booked.</p>
+        <p class="note" id="opt-note">Check what you want to join by April 9, 2027 so Dominique can book the right number of spots. They aren't part of your share. Once prices are set, a Pay button shows up here for each one you pick. After April 9 the list closes and spots are booked.</p>
         <div class="list" id="opt-list"></div>
         <p class="status" id="opt-status" role="status"></p>
       </div>
@@ -1412,6 +1414,10 @@ input,select,textarea{font-size:16px!important}
         <div class="field"><label class="fl" for="pl-p3">Payment 3 · $287</label><input type="url" id="pl-p3" placeholder="https://buy.stripe.com/..."></div>
         <div class="field"><label class="fl" for="pl-final">Final payment · $362 (includes $75 damage deposit)</label><input type="url" id="pl-final" placeholder="https://buy.stripe.com/..."></div>
         <div class="field"><label class="fl" for="stripe">Custom amount link (optional)</label><input type="url" id="stripe" placeholder="https://buy.stripe.com/..."></div>
+        <span class="label" style="margin-top:8px">Add-on payment links</span>
+        <p class="note">One Stripe link per add-on, with "Let customers adjust quantity" on. The price can't be the same as a trip payment ($200, $286, $287 or $362), so the site can tell them apart.</p>
+        <div class="field"><label class="fl" for="ao-glow-price">Glow worm cruise · price per person</label><input type="text" inputmode="decimal" id="ao-glow-price" placeholder="$ amount, card fees included"><input type="url" id="ao-glow-link" placeholder="https://buy.stripe.com/..." aria-label="Glow worm cruise payment link"></div>
+        <div class="field"><label class="fl" for="ao-jetcars-price">Jet cars · price per person</label><input type="text" inputmode="decimal" id="ao-jetcars-price" placeholder="$ amount, card fees included"><input type="url" id="ao-jetcars-link" placeholder="https://buy.stripe.com/..." aria-label="Jet cars payment link"></div>
         <button class="btn navy block" type="submit">Save links</button>
         <p class="status" id="stripe-status" role="status"></p>
         <details class="more"><summary>Chargeback protection setup</summary><ul>
@@ -1818,6 +1824,7 @@ input,select,textarea{font-size:16px!important}
   // Host
   function renderHost(){ $("#host-link").hidden=!isOwner; if(!isOwner) return;
     if(config?.stripeUrl&&document.activeElement!==$("#stripe")) $("#stripe").value=config.stripeUrl;
+    const AO=config?.addons||{}; ["glow","jetcars"].forEach(k=>{ const a=AO[k]||{}; if(a.price&&document.activeElement!==$("#ao-"+k+"-price")) $("#ao-"+k+"-price").value=a.price; if(a.link&&document.activeElement!==$("#ao-"+k+"-link")) $("#ao-"+k+"-link").value=a.link; });
     const PL=config?.payLinks||{}; [["pl-dep","dep"],["pl-p12","p12"],["pl-p3","p3"],["pl-final","final"]].forEach(([fid,k])=>{ if(PL[k]&&document.activeElement!==$("#"+fid)) $("#"+fid).value=PL[k]; });
     const body=$("#roster"); body.replaceChildren(); const ids=Object.keys(guests);
     if(!ids.length){ body.append(el("tr",{},[el("td",{colspan:"6",text:"No RSVPs yet."})])); return; }
@@ -1834,7 +1841,13 @@ input,select,textarea{font-size:16px!important}
   $("#stripe-form").addEventListener("submit",async ev=>{ ev.preventDefault(); const url=$("#stripe").value.trim();
     const payLinks={dep:$("#pl-dep").value.trim(),p12:$("#pl-p12").value.trim(),p3:$("#pl-p3").value.trim(),final:$("#pl-final").value.trim()};
     if([url,...Object.values(payLinks)].some(u=>u&&!/^https:\/\//.test(u))) return flash("stripe-status","Paste each full link, starting with https://","err");
-    try{ await saveConfig({stripeUrl:url,payLinks}); flash("stripe-status","Saved. Friends now see a Pay button on each payment.","ok"); }catch(e){ flash("stripe-status",friendlyErr(e),"err"); } });
+    const addons={}, taken=[200,286,287,362].flatMap(x=>[x,x*2]);
+    for(const k of ["glow","jetcars"]){ const link=$("#ao-"+k+"-link").value.trim(), price=Math.round(parseFloat($("#ao-"+k+"-price").value.replace(/[^0-9.]/g,""))*100)/100;
+      if(link&&!/^https:\/\//.test(link)) return flash("stripe-status","Paste each full link, starting with https://","err");
+      if(link&&!(price>0)) return flash("stripe-status","Add the price for each add-on link.","err");
+      if(price>0&&(taken.includes(price)||taken.includes(price*2))) return flash("stripe-status",`An add-on can't cost ${money(price)} because that matches a trip payment. Change it by a dollar in Stripe and here.`,"err");
+      if(link) addons[k]={link,price}; }
+    try{ await saveConfig({stripeUrl:url,payLinks,addons}); flash("stripe-status","Saved. Friends now see a Pay button on each payment and add-on.","ok"); }catch(e){ flash("stripe-status",friendlyErr(e),"err"); } });
   $("#file-pick").addEventListener("change",async ev=>{ const f=ev.target.files?.[0]; ev.target.value=""; if(!f||!uploadKey||!assets) return; const key=uploadKey; uploadKey=null;
     try{ const r=await assets.upload(f); await saveConfig({photos:{[key]:r.id}}); }catch(e){ flash("stripe-status",e?.message?"Upload failed: "+e.message:"Upload failed. Try a smaller image.","err"); } });
 
@@ -1843,15 +1856,21 @@ input,select,textarea{font-size:16px!important}
   $("#hero-img").src=IMGS.hero; $("#bg-img").src=IMGS.vibe_beach||IMGS.hero;
   (function vibe(){ const row=$("#vibe"); Object.keys(IMGS).filter(k=>k.startsWith("vibe_")).forEach(k=>row.append(el("img",{src:IMGS[k],alt:"",loading:"lazy"}))); })();
   const OPTS=[{key:"glow",short:"Glow worm",title:"Glow worm cruise",sub:"Sat 6:45 PM · about $134"},{key:"jetcars",short:"Jet cars",title:"Jet cars",sub:"Sun 1:00 PM · about $200, 2 per car"},{key:"paddle",short:"Paddleboard",title:"Paddleboards at Chalk Sound",sub:"Thu 10:30 AM · rental paid there"}];
+  function addonPaid(g,k){ const ao=config?.addons?.[k]; if(!ao||!ao.price) return 0; const hit=(g?.payments||[]).filter(p=>!p.matched&&[1,2,3,4].some(q=>Math.abs(p.amount-ao.price*q)<0.01)); return hit.reduce((t,p)=>t+p.amount,0); }
   function optsClosed(){ return Date.now()>new Date("2027-04-10T04:00:00Z").getTime(); } // end of April 9, Eastern
   function renderOpts(){ const box=$("#opt-list"); box.replaceChildren(); const mine=guests[meId]?.optIns||[]; const can=!!(db&&meId);
     OPTS.forEach(o=>{ const id="opt-"+o.key; const cb=el("input",{type:"checkbox",id}); cb.checked=mine.includes(o.key); cb.disabled=!can||optsClosed(); cb.addEventListener("change",()=>toggleOpt(o.key,cb.checked));
-      box.append(el("label",{class:"toggle",for:id},[cb,el("span",{class:"opt-txt"},[el("b",{text:o.title}),el("small",{text:o.sub})])])); });
+      const ao=config?.addons?.[o.key], g=guests[meId]||{}, paidAmt=addonPaid(g,o.key);
+      const sub=ao?`${o.sub.split(" · ")[0]} · ${money(ao.price)} per person`:o.sub;
+      box.append(el("label",{class:"toggle",for:id},[cb,el("span",{class:"opt-txt"},[el("b",{text:o.title}),el("small",{text:sub})])]));
+      if(ao&&mine.includes(o.key)){ if(paidAmt) box.append(el("p",{class:"note ao-paid",text:`✓ Paid ${money(paidAmt)} for ${o.title.toLowerCase()}. Thank you!`}));
+        else { const q=new URLSearchParams(); if(g.email) q.set("prefilled_email",g.email); if(meId) q.set("client_reference_id",String(meId).replace(/[^A-Za-z0-9_-]/g,""));
+          box.append(el("a",{class:"btn ghost ao-pay",href:ao.link+(ao.link.includes("?")?"&":"?")+q.toString(),rel:"noopener",text:`Pay ${money(ao.price)}${g.plusOne&&g.status==="in"?" each":""} with Stripe`})); } } });
     if(optsClosed()){ $("#opt-label").textContent="Optional add-ons · sign-ups closed"; $("#opt-note").textContent="Sign-ups closed April 9 and spots are booked. Text Dominique if you need to change something, and she'll check if there's room."; }
-    else if(!can) $("#opt-status").textContent="Sign in to choose your add-ons.";
+    else if(!can) $("#opt-status").textContent="Sign in to choose your add-ons."; else if($("#opt-status").textContent==="Sign in to choose your add-ons.") $("#opt-status").textContent="";
     const sz={}; Object.values(guests).filter(g=>g.status==="in").forEach(g=>{ if(g.tshirt) sz[g.tshirt]=(sz[g.tshirt]||0)+1; if(g.plusOne?.tshirt) sz[g.plusOne.tshirt]=(sz[g.plusOne.tshirt]||0)+1; });
     const tc=$("#tshirt-counts"); if(tc) tc.textContent="T-shirts: "+(["XS","S","M","L","XL","2XL","3XL"].filter(k=>sz[k]).map(k=>k+" "+sz[k]).join(" · ")||"no sizes yet");
-    const oc=$("#opt-counts"); if(oc){ oc.textContent="Add-ons: "+OPTS.map(o=>o.short+" "+Object.values(guests).filter(g=>g.status==="in"&&(g.optIns||[]).includes(o.key)).length).join(" · "); } }
+    const oc=$("#opt-counts"); if(oc){ oc.textContent="Add-ons: "+OPTS.map(o=>{ const inn=Object.values(guests).filter(g=>g.status==="in"&&(g.optIns||[]).includes(o.key)); const pd=config?.addons?.[o.key]?inn.filter(g=>addonPaid(g,o.key)).length:null; return o.short+" "+inn.length+(pd!=null?` (${pd} paid)`:""); }).join(" · "); } }
   async function toggleOpt(k,on){ if(optsClosed()) return; const cur=new Set(guests[meId]?.optIns||[]); on?cur.add(k):cur.delete(k); try{ await saveMine({optIns:[...cur],updatedAt:new Date().toISOString()}); flash("opt-status",on?"You're in. Saved.":"Removed.","ok"); }catch(e){ flash("opt-status",friendlyErr(e),"err"); } }
 
   // Receipt splitter
