@@ -1097,7 +1097,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
             <div class="pb-fields">
               <div><small>Surname / Nom</small><b id="pb-sur">YOUR NAME</b></div>
               <div><small>Given names / Prénoms</small><b id="pb-given">HERE</b></div>
-              <div class="two"><div><small>Nationality</small><b>BLACK</b></div><div><small>Place of entry</small><b>PROVIDENCIALES</b></div></div>
+              <div class="two"><div><small>Nationality</small><b>USA</b></div><div><small>Place of entry</small><b>PROVIDENCIALES</b></div></div>
               <div class="two"><div><small>Date of entry</small><b>19 MAY 2027</b></div><div><small>Date of expiry</small><b>24 MAY 2027</b></div></div>
               <div class="pb-sig"><small>Holder's signature</small><span id="pb-sig">Your name</span></div>
             </div>
@@ -1547,7 +1547,7 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
     const sigSrc=sigDirty?null:guests[meId]?.signature; const ps=$("#pb-sig"); ps.replaceChildren(); if(sigDirty&&sigCtx){ ps.append(el("img",{src:$("#sigpad").toDataURL("image/png"),alt:""})); } else if(sigSrc){ ps.append(el("img",{src:sigSrc,alt:""})); } else ps.textContent=nm||"Your name"; const ini=(parts.map(x=>x[0]).join("").slice(0,2)||"?").toUpperCase(); $("#pb-initial").textContent=ini; $("#pb-ghost").textContent=ini;
     const no=passNo(); $("#pb-no").textContent=no;
     $("#mrz1").textContent=mrzPad("P<TCI"+(mrzClean(sur)||"YOUR<NAME")+"<<"+mrzClean(given),44);
-    $("#mrz2").textContent=mrzPad(no,9)+"7TCI2705190F2705246"+mrzPad("TRIPPININTURKS",14)+"04";
+    $("#mrz2").textContent=mrzPad(no,9)+"7USA2705190F2705246"+mrzPad("TRIPPININTURKS",14)+"04";
     const st=g?.status; const stamp=$("#pb-stamp");
     stamp.querySelector("small").textContent=st==="out"?"NOT THIS TIME":"ADMITTED";
     book.classList.toggle("out",st==="out");
