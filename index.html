@@ -128,12 +128,13 @@ window.TT_CONFIG = {
     const MODES = {
       code: ["Enter your trip code", "It's in the text Dominique sent you. Enter it once and you're in."],
       rejoin: ["Get back in", "On a new phone? Enter the email you RSVP'd with and the trip code."],
-      email: ["Host sign-in", "Sign in with your email and password."] };
+      email: ["Host sign-in · Dominique only", "This is just for Dominique to manage the trip. Guests don't need a password. Tap \"I'm a guest\" below to use your trip code."] };
     let mode = "code";
     const setMode = m => { const box = $("#rsvp-locked"); if (!box) return; mode = m; box.hidden = false;
       $("#code-form").hidden = m !== "code"; $("#rejoin-form").hidden = m !== "rejoin"; $("#signin-form").hidden = m !== "email";
       $("#lock-title").textContent = MODES[m][0]; $("#signin-msg").textContent = MODES[m][1];
-      $("#lock-toggle").hidden = false; $("#lock-toggle").textContent = m === "code" ? "Already RSVP'd on another phone? Get back in" : "First time here? Enter your trip code";
+      $("#lock-toggle").hidden = false; $("#lock-toggle").textContent = m === "code" ? "Already RSVP'd on another phone? Get back in" : m === "email" ? "I'm a guest, use my trip code" : "First time here? Enter your trip code";
+      $("#lock-toggle").className = m === "email" ? "btn ghost block" : "link-btn";
       $("#host-toggle").hidden = m === "email"; };
     const showEmail = on => setMode(on ? "email" : "code");
     const tg = $("#lock-toggle"); if (tg) tg.addEventListener("click", () => setMode(mode === "code" ? "rejoin" : "code"));
@@ -1202,9 +1203,9 @@ input,select,textarea{font-size:16px!important}
         <p class="note" id="signin-msg">It's in the text Dominique sent you. Enter it once and you're in.</p>
         <form id="code-form" class="signin-row" novalidate><input type="text" id="code-input" placeholder="TRIP CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Trip code"><button class="btn" type="submit">Join</button></form>
         <form id="rejoin-form" class="rejoin" novalidate hidden><input type="email" id="rejoin-email" placeholder="Email you RSVP'd with" autocomplete="email" aria-label="Email you RSVP'd with"><input type="text" id="rejoin-code" placeholder="TRIP CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Trip code"><button class="btn block" type="submit">Get back in</button></form>
-        <form id="signin-form" class="rejoin" novalidate hidden><input type="email" id="signin-email" placeholder="Email" autocomplete="username" aria-label="Your email"><input type="password" id="signin-pass" placeholder="Password" autocomplete="current-password" aria-label="Password"><button class="btn block" type="submit">Sign in</button><button type="button" class="link-btn" id="send-link">Email me a sign-in link instead</button></form>
+        <form id="signin-form" class="rejoin" novalidate hidden><input type="email" id="signin-email" placeholder="Email" autocomplete="username" aria-label="Your email"><input type="password" id="signin-pass" placeholder="Password" autocomplete="current-password" aria-label="Password"><button class="btn block" type="submit">Sign in</button><button type="button" class="link-btn" id="send-link" style="font-size:12px;opacity:.75">Host: email me a sign-in link instead</button></form>
         <button type="button" class="link-btn" id="lock-toggle">Already RSVP'd on another phone? Get back in</button>
-        <button type="button" class="link-btn" id="host-toggle" style="font-size:12px;opacity:.75">Host sign-in</button>
+        <button type="button" class="link-btn" id="host-toggle" style="font-size:12px;opacity:.75">Dominique? Host sign-in</button>
       </div>
       <div class="pbook" id="pbook" aria-hidden="true">
         <div class="pb-page">
