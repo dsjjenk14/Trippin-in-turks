@@ -38,9 +38,9 @@ window.TT_CONFIG = {
     if (!window.supabase || !C.SUPABASE_URL || C.SUPABASE_URL.includes("YOUR-PROJECT")) return null;
     const sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
     window.__sb = sb;
-    // Count this visit (skipped for Dominique in the database)
-    try { let vid = localStorage.getItem("tt_vid"); if (!vid) { vid = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()); localStorage.setItem("tt_vid", vid); }
-      setTimeout(() => { sb.rpc("log_visit", { vid }).then(() => {}, () => {}); }, 1500); } catch (_) {}
+    // Count this visit once we know who it is (skipped for Dominique in the database)
+    const logVisit = uid => { try { let vid = uid || localStorage.getItem("tt_vid"); if (!vid) { vid = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()); localStorage.setItem("tt_vid", vid); }
+      sb.rpc("log_visit", { vid }).then(() => {}, () => {}); } catch (_) {} };
     const { data } = await sb.auth.getSession();
     let session = data.session;
     // Came from the invite link: get them in with no email step
@@ -49,6 +49,7 @@ window.TT_CONFIG = {
         if (session) { const j = await sb.rpc("join_trip", { code: tripCode }); if (!j.data) { await sb.auth.signOut(); session = null; try { localStorage.removeItem("tt_code"); } catch (_) {} } }
       } catch (_) { session = null; }
     }
+    logVisit(session?.user?.id || "");
     if (!session) return { sb, session: null };
     window.TT_ANON = !!session.user.is_anonymous;
     window.TT_EMAIL = session.user.email || "";
@@ -1434,8 +1435,8 @@ input,select,textarea{font-size:16px!important}
       </form>
       <div class="card list" id="visits-card">
         <span class="label">Site visits</span>
-        <div class="visit-grid" id="visit-grid"><div><b>–</b><small>people</small></div><div><b>–</b><small>this week</small></div><div><b>–</b><small>today</small></div><div><b>–</b><small>total visits</small></div></div>
-        <p class="note" id="visit-note">Your own visits aren't counted. A visit is one person opening the site, counted at most once an hour.</p>
+        <div class="visit-grid" id="visit-grid"><div><b>–</b><small>visitors</small></div><div><b>–</b><small>joined</small></div><div><b>–</b><small>this week</small></div><div><b>–</b><small>today</small></div></div>
+        <p class="note" id="visit-note">Joined means they opened your invite link or entered the trip code. Your own visits aren't counted.</p>
       </div>
       <div class="card list" id="invite-card">
         <span class="label">Guest list access</span>
@@ -1834,8 +1835,8 @@ input,select,textarea{font-size:16px!important}
   // Host
   let visitsAt=0;
   async function loadVisits(){ if(!isOwner||Date.now()-visitsAt<60000) return; visitsAt=Date.now(); const sb=window.__sb; if(!sb) return;
-    try{ const { data }=await sb.rpc("visit_stats"); if(!data) return; const g=$("#visit-grid").querySelectorAll("b"); [data.people,data.week,data.today,data.visits].forEach((n,i)=>g[i].textContent=n??0);
-      if(data.last) $("#visit-note").textContent="Last visit "+fmtFull(data.last)+". Your own visits aren't counted. A visit is one person opening the site, counted at most once an hour."; }catch(_){} }
+    try{ const { data }=await sb.rpc("visit_stats"); if(!data) return; const g=$("#visit-grid").querySelectorAll("b"); [data.people,data.joined,data.week,data.today].forEach((n,i)=>g[i].textContent=n??0);
+      $("#visit-note").textContent=`Joined means they opened your invite link or entered the trip code. ${data.visits??0} visits in all${data.last?", last one "+fmtFull(data.last):""}. Your own visits aren't counted.`; }catch(_){} }
   function renderHost(){ $("#host-link").hidden=!isOwner; if(!isOwner) return; loadVisits();
     if(config?.stripeUrl&&document.activeElement!==$("#stripe")) $("#stripe").value=config.stripeUrl;
     const AO=config?.addons||{}; ["jetcars"].forEach(k=>{ const a=AO[k]||{}; if(a.price&&document.activeElement!==$("#ao-"+k+"-price")) $("#ao-"+k+"-price").value=a.price; if(a.link&&document.activeElement!==$("#ao-"+k+"-link")) $("#ao-"+k+"-link").value=a.link; });
