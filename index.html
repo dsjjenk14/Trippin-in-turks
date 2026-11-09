@@ -939,29 +939,42 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
 .cel-card{position:relative;width:min(360px,100%);background:var(--paper);color:var(--ink);border:1px solid var(--gold-soft);box-shadow:0 30px 60px -30px rgba(15,28,48,.6);padding:30px 24px 22px;text-align:center;overflow:hidden}
 .cel-card::before{content:"";position:absolute;inset:8px;border:1px solid var(--gold-soft);pointer-events:none}
 .cel-label{font-family:var(--body);font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold-ink)}
-.cel-card h2{font-family:var(--display);font-weight:400;font-size:38px;line-height:1.05;margin:10px 0 10px;text-wrap:balance}
+.cel-card h2{font-family:var(--display);font-weight:400;font-size:36px;line-height:1.05;margin:2px 0 14px;text-wrap:balance}
 .cel-card p{font-size:14px;line-height:1.6;color:var(--muted);margin:0 0 18px}
-.cel-post{position:relative;margin:2px -4px 18px;border:1px solid var(--line);overflow:hidden}
-.cel-art{display:block;width:100%;height:120px}
-.cel-greet{position:absolute;left:14px;top:8px;text-align:left;font-family:"Great Vibes",cursive;font-size:30px;line-height:1;color:var(--navy);text-shadow:0 1px 0 var(--paper)}
-.cel-greet small{display:block;font-size:19px;margin-bottom:2px}
-.cel-mark{position:absolute;right:8px;bottom:8px;display:grid;place-items:center;width:88px;height:88px;border-radius:50%;border:2px solid var(--mint-ink);color:var(--mint-ink);font-family:"DM Mono",ui-monospace,monospace;font-size:8.5px;letter-spacing:.05em;line-height:1.4;text-align:center;padding:0 8px;transform:rotate(-14deg);background:color-mix(in srgb,var(--paper) 55%,transparent);box-shadow:inset 0 0 0 4px color-mix(in srgb,var(--paper) 55%,transparent),inset 0 0 0 5px var(--mint-ink)}
-.cel-mark small{display:block;font-size:7.5px;letter-spacing:.04em}
+.cel-glasses{display:block;width:150px;height:90px;margin:6px auto 0;overflow:visible}
+.gl-l .gl-in{transform:rotate(9deg)}.gl-r .gl-in{transform:rotate(-9deg)}
+.gl .gl-in{transform-box:fill-box;transform-origin:50% 100%}
+.cel-spark,.cel-bub{opacity:0}
+.cel-tag{position:relative;display:flex;align-items:center;gap:12px;margin:4px 0 18px;padding:14px 14px 14px 30px;background:var(--gold-soft);color:var(--navy);text-align:left;clip-path:polygon(18px 0,100% 0,100% 100%,18px 100%,0 calc(100% - 18px),0 18px);transform-origin:0 50%}
+.cel-hole{position:absolute;left:12px;top:50%;width:10px;height:10px;margin-top:-5px;border-radius:50%;background:var(--paper);box-shadow:inset 0 0 0 1.5px var(--gold-ink)}
+.cel-tag-body{flex:1;min-width:0;display:grid;gap:3px;font-family:"DM Mono",ui-monospace,monospace}
+.cel-tag-body small{font-size:9px;letter-spacing:.24em;color:var(--gold-ink)}
+.cel-tag-body b{font-weight:500;font-size:20px;letter-spacing:.08em;line-height:1.1;overflow-wrap:anywhere}
+.cel-tag-row{font-size:10.5px;letter-spacing:.1em}
+.cel-stamp2{flex:none;border:2px solid var(--mint-ink);color:var(--mint-ink);font-family:"DM Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.14em;padding:5px 7px;transform:rotate(-10deg);background:color-mix(in srgb,var(--paper) 55%,transparent);text-align:center;max-width:84px;line-height:1.3}
 .cel-conf{position:absolute;inset:0;pointer-events:none}
 .cel-conf i{position:absolute;top:-20px;width:8px;height:12px;border-radius:2px;opacity:0}
 @media (prefers-reduced-motion: no-preference){
   .cel.show{animation:celfade .3s ease both}
   .cel.show .cel-card{animation:celpop .65s cubic-bezier(.2,1.3,.4,1) both}
-  .cel.show .cel-sun{animation:celsun 1.4s ease-out .3s both}
-  .cel.show .cel-waves{animation:celwave 3.2s ease-in-out infinite alternate}
-  .cel.show .cel-greet{animation:celfade .8s ease .6s both}
-  .cel.show .cel-mark{animation:celstamp .45s cubic-bezier(.3,1.6,.5,1) 1.2s both}
+  .cel.show .gl-l .gl-in{animation:clinkL 1s cubic-bezier(.3,1.2,.5,1) .35s both}
+  .cel.show .gl-r .gl-in{animation:clinkR 1s cubic-bezier(.3,1.2,.5,1) .35s both}
+  .cel.show .cel-spark{animation:spark .5s ease-out 1s both}
+  .cel.show .cel-bub circle{animation:bub 1.8s ease-out 1.05s both}
+  .cel.show .cel-bub circle:nth-child(2){animation-delay:1.2s}.cel.show .cel-bub circle:nth-child(3){animation-delay:1.35s}.cel.show .cel-bub circle:nth-child(4){animation-delay:1.5s}.cel.show .cel-bub circle:nth-child(5){animation-delay:1.3s}
+  .cel.show .cel-bub{opacity:1}
+  .cel.show #cel-h{animation:celfade .6s ease 1.1s both}
+  .cel.show .cel-tag{animation:swing 1.4s cubic-bezier(.3,1.4,.5,1) 1.4s both}
+  .cel.show .cel-stamp2{animation:celstamp .45s cubic-bezier(.3,1.6,.5,1) 2.4s both}
   .cel.show .cel-conf i{animation:celfall var(--d,3s) ease-in var(--w,0s) both}
   @keyframes celfade{from{opacity:0}}
   @keyframes celpop{from{opacity:0;transform:translateY(40px) scale(.9)}}
-  @keyframes celsun{from{transform:translateY(40px)}}
-  @keyframes celwave{to{transform:translateX(-40px)}}
-  @keyframes celstamp{from{opacity:0;transform:rotate(-14deg) scale(2.4)}}
+  @keyframes clinkL{0%{transform:translateX(-30px) rotate(-6deg)}70%{transform:translateX(1px) rotate(11deg)}100%{transform:rotate(9deg)}}
+  @keyframes clinkR{0%{transform:translateX(30px) rotate(6deg)}70%{transform:translateX(-1px) rotate(-11deg)}100%{transform:rotate(-9deg)}}
+  @keyframes spark{0%{opacity:0;transform:scale(.6)}40%{opacity:1}100%{opacity:0;transform:scale(1.3)}}
+  @keyframes bub{0%{opacity:0;transform:translateY(0)}20%{opacity:1}100%{opacity:0;transform:translateY(-34px)}}
+  @keyframes swing{0%{opacity:0;transform:rotate(-14deg) translateY(-20px)}30%{opacity:1}55%{transform:rotate(5deg)}75%{transform:rotate(-2deg)}100%{transform:none}}
+  @keyframes celstamp{from{opacity:0;transform:rotate(-10deg) scale(2.4)}}
   @keyframes celfall{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:.9;transform:translate(var(--x,0),110vh) rotate(var(--r,540deg))}}
 }
 .rejoin{display:grid;gap:10px}
@@ -1153,19 +1166,21 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
   <div class="cel-conf" id="cel-conf" aria-hidden="true"></div>
   <div class="cel-card">
     <span class="cel-label" id="cel-label">Deposit received</span>
-    <h2 id="cel-h">You're booked!</h2>
-    <div class="cel-post" aria-hidden="true">
-      <svg class="cel-art" viewBox="0 0 300 120" preserveAspectRatio="xMidYMid slice">
-        <rect width="300" height="120" fill="var(--sky)"/>
-        <circle class="cel-sun" cx="168" cy="80" r="30" fill="var(--blush)"/>
-        <g class="cel-waves">
-          <path d="M-40 82 q20 -8 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 V120 H-40Z" fill="var(--mint)"/>
-          <path d="M-40 94 q20 -8 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 V120 H-40Z" fill="var(--mint-soft)" opacity=".9"/>
-        </g>
-        <path d="M0 108 Q150 96 300 108 V120 H0Z" fill="var(--gold-soft)"/>
-      </svg>
-      <span class="cel-greet"><small>Greetings from</small>Grace Bay</span>
-      <span class="cel-mark" id="cel-stamp">CONFIRMED<small>MAY 19 · 2027</small></span>
+    <svg class="cel-glasses" viewBox="0 0 160 96" aria-hidden="true">
+      <g transform="translate(58 18)" class="gl gl-l"><g class="gl-in"><path d="M-11 0 H11 L8 36 Q0 46 -8 36 Z" fill="var(--paper)" stroke="var(--gold-ink)" stroke-width="1.5"/><path d="M-9.6 16 H9.6 L8 36 Q0 46 -8 36 Z" fill="var(--gold)" opacity=".55"/><path d="M0 44 V72 M-11 72 H11" stroke="var(--gold-ink)" stroke-width="1.5" stroke-linecap="round" fill="none"/></g></g>
+      <g transform="translate(102 18)" class="gl gl-r"><g class="gl-in"><path d="M-11 0 H11 L8 36 Q0 46 -8 36 Z" fill="var(--paper)" stroke="var(--gold-ink)" stroke-width="1.5"/><path d="M-9.6 16 H9.6 L8 36 Q0 46 -8 36 Z" fill="var(--gold)" opacity=".55"/><path d="M0 44 V72 M-11 72 H11" stroke="var(--gold-ink)" stroke-width="1.5" stroke-linecap="round" fill="none"/></g></g>
+      <g class="cel-spark" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round"><path d="M80 4 V-2 M71 8 L67 4 M89 8 L93 4"/></g>
+      <g class="cel-bub" fill="var(--gold-soft)"><circle cx="76" cy="20" r="2"/><circle cx="83" cy="22" r="1.6"/><circle cx="80" cy="18" r="1.2"/><circle cx="72" cy="24" r="1.4"/><circle cx="87" cy="19" r="1.8"/></g>
+    </svg>
+    <h2 id="cel-h">Cheers, you're in!</h2>
+    <div class="cel-tag" aria-hidden="true">
+      <span class="cel-hole"></span>
+      <div class="cel-tag-body">
+        <small>PASSENGER</small>
+        <b id="cel-name">YOU</b>
+        <span class="cel-tag-row">PLS · GRACE BAY</span><span class="cel-tag-row">MAY 19 TO 24, 2027</span>
+      </div>
+      <span class="cel-stamp2" id="cel-stamp">CONFIRMED</span>
     </div>
     <p id="cel-p">Your spot in Grace Bay is officially locked in.</p>
     <button class="btn block" type="button" id="cel-go">Let's go</button>
@@ -1940,11 +1955,12 @@ section.gtk[aria-labelledby="faq-h"] .gtk-item[open]{box-shadow:inset 2px 0 0 va
     saveMine({celebrated:{...cel,[k]:new Date().toISOString()}}).catch(()=>{});
     const two=!!g.plusOne, first=(g.nickname||"").split(" ")[0];
     const next=(config.installments||[])[0];
-    if(k==="deposit"){ $("#cel-label").textContent="Deposit received"; $("#cel-h").textContent=first?`You're booked, ${first}!`:"You're booked!";
+    if(k==="deposit"){ $("#cel-label").textContent="Deposit received"; $("#cel-h").textContent="Cheers, you're in!";
       $("#cel-p").textContent=(two?"You and your plus one are officially locked in for Grace Bay.":"Your spot in Grace Bay is officially locked in.")+(next?` Next up is ${next.label.toLowerCase()} on ${fmtDate(next.due)}, and you'll be added to the group chat when it goes live in December.`:"");
-      $("#cel-stamp").firstChild.textContent="CONFIRMED"; $("#cel-go").textContent="Let's go"; }
+      $("#cel-stamp").textContent="CONFIRMED"; $("#cel-go").textContent="Let's go"; }
     else { $("#cel-label").textContent="Paid in full"; $("#cel-h").textContent="All paid up!";
-      $("#cel-p").textContent="That's everything. All that's left is packing your peach and brown and counting down the days. Your damage deposit comes back by June 8."; $("#cel-stamp").firstChild.textContent="PAID IN FULL"; $("#cel-go").textContent="Can't wait"; }
+      $("#cel-p").textContent="That's everything. All that's left is packing your peach and brown and counting down the days. Your damage deposit comes back by June 8."; $("#cel-stamp").textContent="PAID IN FULL"; $("#cel-go").textContent="Can't wait"; }
+    $("#cel-name").textContent=((first||"Traveler")+(two?" + 1":"")).toUpperCase();
     const conf=$("#cel-conf"); conf.replaceChildren(); const cols=["var(--mint)","var(--blush)","var(--gold)","var(--gold-soft)","var(--sky)"];
     for(let i=0;i<42;i++){ const c=document.createElement("i"); c.style.left=Math.random()*100+"%"; c.style.background=cols[i%cols.length];
       c.style.setProperty("--d",(2.4+Math.random()*1.8).toFixed(2)+"s"); c.style.setProperty("--w",(Math.random()*.9).toFixed(2)+"s");
